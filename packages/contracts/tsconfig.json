@@ -1,0 +1,4 @@
+{
+  "extends": "@afuch/tsconfig/base.json",
+  "include": ["src"]
+}

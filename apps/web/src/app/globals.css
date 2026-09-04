@@ -1,0 +1,95 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Azul institucional extraído del logo original de AFUCH: #00205C. */
+  --color-navy-50: #eef2f9;
+  --color-navy-100: #d7e0ef;
+  --color-navy-200: #b0c1de;
+  --color-navy-400: #4a6bab;
+  --color-navy-600: #1b4189;
+  --color-navy-800: #00205c;
+  --color-navy-900: #00153d;
+
+  /* Acento único. No se usa para texto de cuerpo ni botones primarios: su
+     valor está en que aparece poco. */
+  --color-gold-100: #f8eec9;
+  --color-gold-500: #d4a72c;
+  --color-gold-700: #8a6a12;
+
+  --font-sans:
+    var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  --breakpoint-xs: 30rem;
+}
+
+/* Paleta de categorías del catálogo. Cada par fondo/texto verificado a
+   contraste AA sobre blanco. */
+@theme {
+  --color-cat-salud-bg: #e3f0ec;
+  --color-cat-salud-fg: #14513f;
+  --color-cat-ahorro-bg: #e6edf9;
+  --color-cat-ahorro-fg: #1a3f7a;
+  --color-cat-solidaridad-bg: #f8eec9;
+  --color-cat-solidaridad-fg: #6d520b;
+  --color-cat-gas-bg: #fde8de;
+  --color-cat-gas-fg: #8a3a12;
+  --color-cat-funeraria-bg: #eae7f2;
+  --color-cat-funeraria-fg: #40356b;
+  --color-cat-educacion-bg: #e0eef3;
+  --color-cat-educacion-fg: #14505f;
+  --color-cat-recreacion-bg: #e9f1dd;
+  --color-cat-recreacion-fg: #3c5417;
+  --color-cat-comercio-bg: #f6e6ee;
+  --color-cat-comercio-fg: #6f2044;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: white;
+    color: var(--color-slate-800);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Foco visible en todo elemento interactivo: el sitio debe ser completamente
+     navegable por teclado. */
+  :focus-visible {
+    outline: 3px solid var(--color-gold-500);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-navy-800);
+    color: white;
+  }
+}
+
+@layer components {
+  /* Mayúsculas con tracking abierto: es el gesto del logotipo impreso,
+     traído al sitio para amarrar la identidad. */
+  .eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

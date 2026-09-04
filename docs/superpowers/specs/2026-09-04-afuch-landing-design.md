@@ -251,8 +251,20 @@ Seguro Oncológico FALP.
 ### 5.3 Noticia
 
 ```
-slug · titulo · bajada · fecha · categoria · portada? · cuerpo (MDX) · autor?
+slug · titulo · bajada · fecha · categoria · portada? · cuerpo (MDX)
+autor? · creditoFoto? · fuente? { nombre, url }
 ```
+
+`fuente` permite republicar notas de terceros con atribución visible y enlace al
+original, que es el caso de la primera noticia cargada.
+
+**Noticia inicial cargada:** «Rectora Mizala sostuvo su primera reunión con la
+directiva de Fenafuch», publicada el 28 de julio de 2026 en `uchile.cl`
+(reunión del miércoles 22 de julio). Texto de Comunicaciones Rectoría,
+fotografías de Alejandra Fuenzalida. Se replica el cuerpo completo con
+atribución a la fuente original y enlace a
+`https://uchile.cl/noticias/242858/rectora-mizala-sostuvo-su-primera-reunion-con-la-directiva-de-fenafuch`.
+Categoría: `institucional`.
 
 ### 5.4 Datos de sede
 
@@ -355,9 +367,16 @@ Se construye con placeholder visiblemente marcado y se entrega un checklist:
 
 1. Textos de historia y misión institucional.
 2. Fotos y cargos de la directiva actual.
-3. Estatutos en PDF.
+3. **Estatutos en PDF.** Mientras tanto, `/quienes-somos` enlaza la versión
+   publicada en Scribd:
+   `https://www.scribd.com/document/738076080/ESTATUTO-AFUCHSCEN`.
+   Es enlace externo, no descarga directa: Scribd exige cuenta para bajar el
+   archivo, así que el botón se rotula «Ver estatutos» y abre en pestaña nueva.
+   Cuando AFUCH entregue el PDF, se sirve desde `apps/web/public/documentos/`
+   y el botón pasa a ser descarga real sin tocar el componente.
 4. Dirección de la sede, horarios de atención, teléfono y correo.
-5. Dos o tres noticias iniciales.
+5. Más noticias. Hoy hay una cargada (ver 5.3); el listado necesita al menos
+   tres para que la home y la paginación se vean bien.
 6. Vigencia y valores actualizados de cada convenio — los montos de este spec
    provienen de documentos de septiembre 2026 y deben confirmarse antes de
    publicar.
