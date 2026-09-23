@@ -44,7 +44,7 @@ algo, la decisión queda registrada en la sección 3 con su motivo.
 | B3 | Sin rate limiting ni cabeceras de seguridad en el endpoint de contacto. | spec §6.1 |
 | B4 | ESLint no instalado (`next lint` sin dependencia), sin Prettier, sin Playwright. | `apps/web/package.json` |
 | B5 | Sin `docker-compose.yml`, `Dockerfile`, `.env.example` ni CI. | spec §2.1, §6.1 |
-| B6 | Correo de sede mal escrito: `contacto@afuchserviciocentrales.cl` → `contacto@afuchservicioscentrales.cl`. Los datos de sede **son reales** (confirmado): se quita `pendientesDeConfirmacion` y el aviso en `/contacto`. | `apps/web/src/content/sede.ts` |
+| B6 | Correo de sede mal escrito: `contacto@afuchserviciocentrales.cl`. **Actualización 2026-09-23:** el dominio real es `afuchscen.cl` (sitio en `https://www.afuchscen.cl`, correo `contacto@afuchscen.cl`). Los datos de sede **son reales** (confirmado): se quita `pendientesDeConfirmacion` y el aviso en `/contacto`. | `apps/web/src/content/sede.ts` |
 | B7 | Área privada (2.2) sin empezar. | — |
 | B8 | Seguridad y cumplimiento (2.4) sin empezar. | — |
 | B9 | Contenido institucional pendiente de AFUCH (historia, misión, directiva, estatutos PDF, más noticias, vigencias de convenios). | spec §9 |
@@ -321,7 +321,7 @@ Requiere VPS, dominio, DNS y clave de Resend; se ejecuta con el runbook.
 | P7 | Canal de entrega mensual de la planilla (recomendado: no WhatsApp). | Abierta |
 | P8 | Retención del historial de descuentos y de respaldos. | Abierta (por defecto: respaldos 30 días) |
 | P9 | Documentos de rendición iniciales y sus categorías. | Abierta |
-| P10 | Dominio `afuchservicioscentrales.cl` y acceso al DNS. | Abierta |
+| P10 | Dominio `afuchscen.cl`: titular en NIC Chile y acceso al DNS. | Abierta (dominio confirmado) |
 | P11 | Proveedor de VPS y titular de la cuenta. | Abierta |
 | P12 | Contenido pendiente del spec §9 (historia, misión, directiva, estatutos, noticias, vigencias, Dimeiggs). | Abierta |
 

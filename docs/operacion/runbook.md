@@ -31,7 +31,7 @@ alias dc='docker compose -f /opt/afuch/infra/docker-compose.yml --env-file /opt/
 
 ## 3. DNS y correo
 
-- Registro `A` (y `AAAA` si aplica) de `afuchservicioscentrales.cl` y `www` hacia la IP del VPS. Caddy obtiene el certificado HTTPS solo cuando el DNS apunta al VPS.
+- Registro `A` (y `AAAA` si aplica) de `afuchscen.cl` y `www.afuchscen.cl` hacia la IP del VPS. Caddy obtiene el certificado HTTPS solo cuando el DNS apunta al VPS.
 - Resend: agregar el dominio y crear los registros SPF/DKIM que indique el panel. Sin eso, los correos de verificación caen en spam.
 
 ## 4. Primer despliegue
@@ -57,7 +57,7 @@ dc run --rm herramientas pnpm cli admin:crear persona@lapalanca.cl
 `admin:crear` imprime una contraseña y un secreto TOTP una sola vez: cargarlo en una app
 autenticadora (Google Authenticator, 1Password, etc.) y guardar la contraseña en el gestor.
 
-Verificar: `https://afuchservicioscentrales.cl` responde, `/admin/ingreso` permite entrar.
+Verificar: `https://www.afuchscen.cl` responde, `/admin/ingreso` permite entrar.
 
 ## 5. Carga mensual
 
@@ -132,7 +132,7 @@ sus descuentos. Registrar fecha y resultado.
 
 ## 9. Monitoreo
 
-- Disponibilidad: un servicio externo de monitoreo que consulte `https://afuchservicioscentrales.cl/` cada 5 minutos y avise por correo.
+- Disponibilidad: un servicio externo de monitoreo que consulte `https://www.afuchscen.cl/` cada 5 minutos y avise por correo.
 - Respaldos: revisar `/var/log/afuch-respaldo.log`; configurar `MAILTO` en el cron para recibir los errores.
 - Logs de la app: `dc logs --since 24h web`.
 - Auditoría funcional: `/admin/auditoria`.

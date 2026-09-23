@@ -95,7 +95,7 @@ export async function registrar({ rut, correo }: RegistroInput, ip: string): Pro
     parrafos: [
       'Recibimos una solicitud para crear tu cuenta en el área de socios de AFUCH Servicios Centrales.',
       'Para terminar, confirma tu correo y define tu contraseña. El enlace vence en 24 horas.',
-      'Si no fuiste tú, ignora este correo y avísanos respondiendo a contacto@afuchservicioscentrales.cl.',
+      `Si no fuiste tú, ignora este correo y avísanos a ${env().CORREO_CONTACTO_DESTINO}.`,
     ],
     boton: {
       texto: 'Confirmar correo y crear contraseña',

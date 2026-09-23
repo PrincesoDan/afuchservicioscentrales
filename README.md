@@ -150,8 +150,8 @@ se versionan (están en `.gitignore`).
 | `NEXTAUTH_SECRET`         | Sí            | Firma las sesiones. Cambiarla cierra todas las sesiones                                                                      |
 | `NEXTAUTH_URL`            | Sí            | URL pública del sitio; se usa en los enlaces de los correos                                                                  |
 | `RESEND_API_KEY`          | En producción | API key de Resend. Sin ella (solo desarrollo) los correos se imprimen en consola                                             |
-| `CORREO_REMITENTE`        | No            | Remitente. Por defecto `AFUCH Servicios Centrales <no-responder@afuchservicioscentrales.cl>`                                 |
-| `CORREO_CONTACTO_DESTINO` | No            | Dónde llegan los mensajes del formulario. Por defecto `contacto@afuchservicioscentrales.cl`                                  |
+| `CORREO_REMITENTE`        | No            | Remitente. Por defecto `AFUCH Servicios Centrales <no-responder@afuchscen.cl>`                                               |
+| `CORREO_CONTACTO_DESTINO` | No            | Dónde llegan los mensajes del formulario. Por defecto `contacto@afuchscen.cl`                                                |
 | `STORAGE_DIR`             | No            | Carpeta de los PDF de rendición. Por defecto `./storage`                                                                     |
 | `CORREO_BUZON_DIR`        | No            | Solo desarrollo: guarda cada correo como archivo JSON                                                                        |
 
@@ -293,10 +293,10 @@ Respaldos: `infra/respaldo/respaldar.sh` (cron diario) y `restaurar.sh`.
 | #   | Qué                                                                                             | Quién              | Dónde se usa                                     |
 | --- | ----------------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------ |
 | 1   | Contratar el **VPS** a nombre de AFUCH                                                          | AFUCH / La Palanca | Runbook §1                                       |
-| 2   | Confirmar titularidad del dominio **afuchservicioscentrales.cl** y acceso al DNS                | AFUCH              | Runbook §3                                       |
+| 2   | Confirmar titularidad del dominio **afuchscen.cl** y acceso al DNS                              | AFUCH              | Runbook §3                                       |
 | 3   | Registros DNS `A`/`AAAA` hacia el VPS                                                           | La Palanca         | Caddy (HTTPS)                                    |
 | 4   | Cuenta en **Resend**, verificar el dominio (SPF/DKIM) y crear la **API key** → `RESEND_API_KEY` | La Palanca         | Correos de contacto, verificación y recuperación |
-| 5   | Confirmar que `contacto@afuchservicioscentrales.cl` existe y recibe correo                      | AFUCH              | Formulario de contacto                           |
+| 5   | Confirmar que `contacto@afuchscen.cl` existe y recibe correo                                    | AFUCH              | Formulario de contacto                           |
 | 6   | Generar las claves de `infra/.env` y guardarlas en un gestor de contraseñas                     | La Palanca         | Producción                                       |
 | 7   | Almacenamiento externo para respaldos + `rclone config` + clave de respaldo                     | La Palanca         | Runbook §7                                       |
 | 8   | Monitoreo externo de disponibilidad                                                             | La Palanca         | Runbook §9                                       |

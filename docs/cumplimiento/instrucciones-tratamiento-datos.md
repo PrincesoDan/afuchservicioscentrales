@@ -8,7 +8,7 @@ firmarse junto con la propuesta (propuesta §8, paso 3).
 | Responsable del tratamiento | AFUCH Servicios Centrales (Asociación de Funcionarios de la Universidad de Chile — Servicios Centrales) |
 | Encargado del tratamiento | Agencia La Palanca |
 | Marco | Ley 21.719 sobre protección de datos personales |
-| Plataforma | Sitio web institucional y área privada de socios (`afuchservicioscentrales.cl`) |
+| Plataforma | Sitio web institucional y área privada de socios (`afuchscen.cl`) |
 
 ## 1. Objeto
 
@@ -76,7 +76,7 @@ Todo cambio de subencargado se informa previamente a AFUCH.
 ## 8. Derechos de los titulares
 
 Las solicitudes de acceso, rectificación, supresión, oposición y portabilidad se reciben en
-`contacto@afuchservicioscentrales.cl`. La Palanca asiste a AFUCH según
+`contacto@afuchscen.cl`. La Palanca asiste a AFUCH según
 `docs/cumplimiento/procedimientos.md` §1, dentro del plazo legal.
 
 ## 9. Incidentes de seguridad

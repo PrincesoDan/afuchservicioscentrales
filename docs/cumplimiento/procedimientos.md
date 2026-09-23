@@ -5,7 +5,7 @@ Los plazos legales exactos deben confirmarse con asesoría legal.
 
 ## 1. Derechos del titular
 
-Canal: `contacto@afuchservicioscentrales.cl` o el formulario de `/contacto`.
+Canal: `contacto@afuchscen.cl` o el formulario de `/contacto`.
 
 1. **Recepción.** AFUCH registra la solicitud (fecha, titular, derecho ejercido) y la reenvía a La Palanca si requiere acción técnica.
 2. **Verificación de identidad.** AFUCH confirma que quien solicita es el titular (por ejemplo, desde su correo institucional o presencialmente en la sede). Nunca se entregan datos a quien no se verificó.

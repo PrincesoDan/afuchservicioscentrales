@@ -21,10 +21,8 @@ const esquema = z.object({
   RESEND_API_KEY: z.string().optional(),
   /** Solo desarrollo: carpeta donde se guardan los correos en vez de enviarlos. */
   CORREO_BUZON_DIR: z.string().optional(),
-  CORREO_REMITENTE: z
-    .string()
-    .default('AFUCH Servicios Centrales <no-responder@afuchservicioscentrales.cl>'),
-  CORREO_CONTACTO_DESTINO: z.string().email().default('contacto@afuchservicioscentrales.cl'),
+  CORREO_REMITENTE: z.string().default('AFUCH Servicios Centrales <no-responder@afuchscen.cl>'),
+  CORREO_CONTACTO_DESTINO: z.string().email().default('contacto@afuchscen.cl'),
   /** Carpeta persistente (volumen Docker) para los documentos de rendición. */
   STORAGE_DIR: z.string().default('./storage'),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
