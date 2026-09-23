@@ -4,6 +4,12 @@
 **Estado:** aprobado (diseño)
 **Alcance:** Fase 1 — sitio público completo. El área privada de socios es Fase 2.
 
+> **Actualización 2026-09-23.** La arquitectura cambió a **solo Next.js** (sin
+> `apps/api` ni NestJS): el backend vive en route handlers y server actions de
+> `apps/web`. El área privada ya está implementada. Decisiones y alcance vigente:
+> `docs/superpowers/plans/2026-09-23-plan-cierre-propuesta.md`. Las secciones 2 y 6
+> de este documento están actualizadas; el resto se conserva como registro del diseño.
+
 ---
 
 ## 1. Contexto
@@ -25,8 +31,8 @@ Fuente de requisitos: `info/Propuesta-AFUCH-Sitio-Web-La-Palanca-1.pdf`
 |---|---|
 | Alcance F1 | Sitio público completo (5 páginas + legales + placeholder socios) |
 | Tipografía | Inter Variable, con stack Helvetica/Arial de respaldo |
-| Stack | Next.js + NestJS, pnpm workspaces + Turborepo |
-| Backend F1 | Scaffold + endpoint de contacto. Sin base de datos. |
+| Stack | Next.js full-stack, pnpm workspaces + Turborepo (NestJS descartado el 2026-09-23) |
+| Backend F1 | Route handler de contacto en Next.js. Sin base de datos para el contacto. |
 | Convenios FENAFUCH | Se publican como convenios de AFUCH, sin distinguir origen |
 | Acento dorado | Aprobado |
 
@@ -39,57 +45,45 @@ Fuente de requisitos: `info/Propuesta-AFUCH-Sitio-Web-La-Palanca-1.pdf`
 ```
 afuchservicioscentrales/
 ├── apps/
-│   ├── web/                    # Next.js 15 · App Router · TS · Tailwind 4
-│   │   ├── src/
-│   │   │   ├── app/            # rutas
-│   │   │   ├── components/     # componentes de UI
-│   │   │   ├── content/        # datos tipados: convenios, noticias, sede
-│   │   │   └── lib/            # utilidades (formato CLP, filtros, fetch)
-│   │   └── public/             # logos SVG, OG images, estatutos
-│   └── api/                    # NestJS 11 · TS
-│       └── src/
-│           ├── contact/        # único módulo con lógica en F1
-│           └── health/
+│   └── web/                    # Next.js 15 · App Router · TS · Tailwind 4
+│       ├── src/
+│       │   ├── app/            # rutas públicas, /socios, /admin, /api
+│       │   ├── components/     # componentes de UI
+│       │   ├── content/        # datos tipados: convenios, noticias, sede
+│       │   ├── lib/            # utilidades (formato CLP, filtros)
+│       │   └── server/         # lógica de servidor (correo, cifrado, importación…)
+│       ├── scripts/cli.ts      # CLI de administración
+│       └── e2e/                # Playwright
 ├── packages/
 │   ├── contracts/              # Zod schemas + tipos compartidos + validarRut
+│   ├── db/                     # Prisma schema, migraciones y cliente
 │   └── tsconfig/               # configuración TS base
+├── infra/                      # Dockerfile, docker-compose, Caddy, respaldos
 ├── info/                       # material fuente entregado por AFUCH
-├── docs/superpowers/specs/
-├── pnpm-workspace.yaml
-├── turbo.json
-└── docker-compose.yml          # Postgres, disponible pero sin uso en F1
+└── docs/
 ```
 
 **No hay `packages/ui`.** Con un solo frontend, un paquete de componentes
-compartidos es abstracción prematura. Los componentes viven en
-`apps/web/src/components/`. Si el área privada de F2 justifica separarlos, se
-separan entonces.
+compartidos es abstracción prematura.
 
-**`packages/contracts` sí se justifica desde F1:** el schema del formulario de
-contacto lo valida el navegador y lo revalida el servidor. Una sola definición,
-sin riesgo de que las dos validaciones se separen con el tiempo.
+**`packages/contracts`** existe porque el navegador y el servidor validan con el
+mismo schema (contacto, registro, ingreso). Una sola definición.
 
 ### 2.2 Límites entre unidades
 
 | Unidad | Qué hace | De qué depende |
 |---|---|---|
-| `packages/contracts` | Define schemas Zod, tipos derivados y `validarRut`. Cero I/O, cero dependencias de framework. | Solo `zod` |
-| `apps/web` | Renderiza el sitio público. Lee contenido local; envía el formulario al API. | `contracts` |
-| `apps/api` | Recibe, revalida y despacha el mensaje de contacto por correo. | `contracts` |
+| `packages/contracts` | Schemas Zod, tipos derivados y `validarRut`. Cero I/O. | Solo `zod` |
+| `packages/db` | Schema Prisma, migraciones y cliente. | Prisma, `pg` |
+| `apps/web` | Sitio público, área de socios, admin interno y CLI. | `contracts`, `db` |
 
-`contracts` no importa nada de `web` ni de `api`. Esa dirección única es lo que
-permite cambiar el origen de los datos en F2 sin tocar las vistas.
+### 2.3 Flujo de datos
 
-### 2.3 Flujo de datos en F1
-
-- **Contenido (convenios, noticias, sede):** archivos TS en
-  `apps/web/src/content/`, validados en tiempo de build contra los schemas de
-  `contracts`. Se renderiza estático.
-- **Formulario de contacto:** navegador → `POST /api/contact` → validación →
-  correo. Sin persistencia.
-
-En F2 el contenido pasa a servirse desde el API. Como los datos ya cumplen el
-mismo schema, migrar significa cambiar el origen, no reescribir componentes.
+- **Contenido público (convenios, noticias, sede):** archivos TS en
+  `apps/web/src/content/`, validados en build contra `contracts`. Estático.
+- **Formulario de contacto:** navegador → `POST /api/contacto` → validación →
+  rate limit → correo (Resend). Sin persistencia del mensaje.
+- **Área privada:** ver el plan de cierre (§5–§7).
 
 ---
 
@@ -276,19 +270,15 @@ entregue.
 
 ## 6. Backend (Fase 1)
 
-`apps/api` — NestJS con un solo módulo con lógica.
+`apps/web/src/app/api/contacto/route.ts` (route handler de Next.js).
 
 | Endpoint | Descripción |
 |---|---|
-| `POST /api/contact` | Valida con el schema compartido, aplica honeypot y rate limiting, despacha correo vía Resend |
-| `GET /health` | Healthcheck para el hosting |
+| `POST /api/contacto` | Valida con el schema compartido, aplica honeypot y rate limiting, despacha correo vía Resend |
 
-**Sin base de datos y sin persistir mensajes.** Un mensaje de contacto con RUT es
-dato personal: almacenarlo en F1 abre obligaciones de Ley 21.719 (cifrado,
-retención, respaldo, derechos de acceso y supresión) sin ningún beneficio, dado
-que el mensaje igual llega por correo. Postgres queda declarado en
-`docker-compose.yml` y Prisma entra en F2, junto con el área privada, que es
-donde la base de datos sí se necesita.
+**Sin persistir mensajes de contacto.** Un mensaje con RUT es dato personal:
+almacenarlo abre obligaciones de Ley 21.719 sin beneficio, dado que el mensaje
+igual llega por correo.
 
 **Schema de contacto** (`packages/contracts`):
 
@@ -307,10 +297,10 @@ exactamente la misma validación. Se escribe una vez.
 
 ### 6.1 Seguridad F1
 
-- Rate limiting por IP en `/api/contact` (`@nestjs/throttler`).
+- Rate limiting por IP en `/api/contacto` (`rate-limiter-flexible` sobre Postgres).
 - Honeypot invisible contra bots.
-- CORS restringido al dominio del sitio.
-- Cabeceras vía `helmet`.
+- Mismo origen: el navegador solo habla con el propio sitio (sin CORS).
+- Cabeceras de seguridad (CSP, HSTS, X-Frame-Options…) en `next.config.ts`.
 - Secretos solo por variables de entorno; `.env.example` versionado, `.env` no.
 - Dockerfile, para que AFUCH elija hosting sin quedar amarrada a un proveedor.
 
@@ -327,7 +317,7 @@ contacto, filtros y buscador del catálogo, formato de montos CLP.
 |---|---|---|
 | `contracts` | Vitest | Casos válidos, inválidos, límites; RUT con DV correcto, incorrecto, con K, con y sin formato |
 | `web` | Vitest + Testing Library | Filtros y búsqueda, render de fichas, estados del formulario |
-| `api` | Vitest + supertest | Contacto: éxito, payload inválido, honeypot activado, rate limit excedido |
+| `web/server` | Vitest + Postgres de tests | Importación, cuentas, administración, rendición, cifrado |
 | e2e | Playwright | Navegación completa; filtrar beneficios por categoría; enviar contacto |
 
 ### 7.2 Accesibilidad

@@ -46,7 +46,11 @@ export function SiteHeader() {
 
       <Container>
         <div className="flex h-20 items-center justify-between gap-6">
-          <Link href="/" className="flex shrink-0 items-center" aria-label="AFUCH Servicios Centrales, ir al inicio">
+          <Link
+            href="/"
+            className="flex shrink-0 items-center"
+            aria-label="AFUCH Servicios Centrales, ir al inicio"
+          >
             <Image
               src="/logos/banner-blanco.webp"
               alt="AFUCH Servicios Centrales"
@@ -66,7 +70,9 @@ export function SiteHeader() {
                   href={href}
                   aria-current={activa ? 'page' : undefined}
                   className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                    activa ? 'bg-white/15 text-white' : 'text-navy-100 hover:bg-white/10 hover:text-white'
+                    activa
+                      ? 'bg-white/15 text-white'
+                      : 'text-navy-100 hover:bg-white/10 hover:text-white'
                   }`}
                 >
                   {etiqueta}
@@ -91,7 +97,14 @@ export function SiteHeader() {
               className="rounded-md p-2 text-white hover:bg-white/10 lg:hidden"
             >
               <span className="sr-only">{menuAbierto ? 'Cerrar menú' : 'Abrir menú'}</span>
-              <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                aria-hidden="true"
+              >
                 {menuAbierto ? (
                   <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
                 ) : (

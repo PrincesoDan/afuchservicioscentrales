@@ -1,0 +1,11 @@
+# HTTPS automático con Let's Encrypt. Caddy agrega la IP real del cliente como
+# X-Forwarded-For (y descarta la que envíe el cliente), que la app usa para el
+# rate limiting y la auditoría.
+{$DOMINIO} {
+	encode zstd gzip
+	reverse_proxy web:3000
+}
+
+www.{$DOMINIO} {
+	redir https://{$DOMINIO}{uri} permanent
+}

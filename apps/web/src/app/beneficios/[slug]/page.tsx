@@ -73,7 +73,10 @@ export default async function PaginaConvenio({ params }: Props) {
               <ul className="mt-5 space-y-3">
                 {convenio.beneficios.map((beneficio) => (
                   <li key={beneficio} className="flex gap-3 text-base/7 text-slate-700">
-                    <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gold-500" />
+                    <span
+                      aria-hidden="true"
+                      className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gold-500"
+                    />
                     {beneficio}
                   </li>
                 ))}
@@ -89,7 +92,10 @@ export default async function PaginaConvenio({ params }: Props) {
                           <th scope="col" className="py-3 pr-4 text-sm font-semibold text-navy-900">
                             Concepto
                           </th>
-                          <th scope="col" className="py-3 text-right text-sm font-semibold text-navy-900">
+                          <th
+                            scope="col"
+                            className="py-3 text-right text-sm font-semibold text-navy-900"
+                          >
                             Monto
                           </th>
                         </tr>

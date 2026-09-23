@@ -71,13 +71,6 @@ export default function PaginaContacto() {
                   ))}
                 </dl>
               </div>
-
-              {SEDE.pendientesDeConfirmacion ? (
-                <p className="rounded-lg border border-gold-500/40 bg-gold-100/50 p-4 text-xs/5 text-gold-700">
-                  Dirección, teléfono, correo y horarios son datos de referencia a la espera de
-                  confirmación de AFUCH Servicios Centrales.
-                </p>
-              ) : null}
             </aside>
           </div>
         </Container>

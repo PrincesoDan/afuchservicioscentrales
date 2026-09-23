@@ -1,0 +1,20 @@
+# Postgres para desarrollo y tests locales. Producción: infra/docker-compose.yml.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: afuch-postgres-dev
+    environment:
+      POSTGRES_USER: afuch
+      POSTGRES_PASSWORD: afuch
+      POSTGRES_DB: afuch
+    ports:
+      - '5433:5432'
+    volumes:
+      - afuch-pg-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U afuch']
+      interval: 5s
+      retries: 10
+
+volumes:
+  afuch-pg-dev:

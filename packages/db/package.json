@@ -1,0 +1,31 @@
+{
+  "name": "@afuch/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "prisma generate",
+    "generate": "prisma generate",
+    "migrate:dev": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@afuch/tsconfig": "workspace:*",
+    "@types/node": "^22.20.1",
+    "@types/pg": "^8.23.1",
+    "dotenv": "^18.0.3",
+    "prisma": "7.10.0",
+    "typescript": "^5.9.3"
+  }
+}

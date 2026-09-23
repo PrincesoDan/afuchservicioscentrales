@@ -10,9 +10,7 @@ import { NOTICIAS } from '@/content/noticias';
 import { formatearClp } from '@/lib/convenios';
 
 const destacados = CONVENIOS.filter((convenio) => convenio.destacado);
-const ultimasNoticias = [...NOTICIAS]
-  .sort((a, b) => b.fecha.localeCompare(a.fecha))
-  .slice(0, 3);
+const ultimasNoticias = [...NOTICIAS].sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, 3);
 
 const fondoSolidario = CONVENIOS.find((convenio) => convenio.slug === 'fondo-solidario');
 
@@ -32,8 +30,7 @@ export default function PaginaInicio() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 opacity-[0.07]"
           style={{
-            backgroundImage:
-              'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+            backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
             backgroundSize: '28px 28px',
           }}
         />
@@ -46,9 +43,9 @@ export default function PaginaInicio() {
                 La asociación de quienes hacen andar la Universidad
               </h1>
               <p className="mt-6 max-w-xl text-lg/8 text-navy-100">
-                Somos AFUCH Servicios Centrales. Negociamos convenios, sostenemos un fondo
-                solidario y acompañamos a las trabajadoras y trabajadores de la Casa de Bello
-                en lo cotidiano y en lo difícil.
+                Somos AFUCH Servicios Centrales. Negociamos convenios, sostenemos un fondo solidario
+                y acompañamos a las trabajadoras y trabajadores de la Casa de Bello en lo cotidiano
+                y en lo difícil.
               </p>
 
               <div className="mt-9 flex flex-wrap gap-3">
@@ -123,8 +120,8 @@ export default function PaginaInicio() {
                 </h2>
                 <p className="mt-5 text-base/7 text-navy-100">{fondoSolidario.descripcion}</p>
                 <p className="mt-5 text-base/7 text-navy-100">
-                  Incluye además asesoría legal gratuita en causas laborales y un bono de
-                  invierno anual, sujeto a disponibilidad de fondos.
+                  Incluye además asesoría legal gratuita en causas laborales y un bono de invierno
+                  anual, sujeto a disponibilidad de fondos.
                 </p>
                 <BotonLink
                   href={`/beneficios/${fondoSolidario.slug}`}

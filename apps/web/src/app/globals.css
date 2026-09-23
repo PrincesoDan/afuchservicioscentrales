@@ -16,8 +16,7 @@
   --color-gold-500: #d4a72c;
   --color-gold-700: #8a6a12;
 
-  --font-sans:
-    var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-sans: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
   --breakpoint-xs: 30rem;
 }

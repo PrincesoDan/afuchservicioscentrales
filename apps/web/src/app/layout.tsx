@@ -19,7 +19,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://afuchserviciocentrales.cl'),
+  metadataBase: new URL(SEDE.sitioUrl),
   title: {
     default: 'AFUCH Servicios Centrales',
     template: '%s · AFUCH Servicios Centrales',
@@ -41,8 +41,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     '@type': 'Organization',
     name: SEDE.nombre,
     alternateName: SEDE.nombreLargo,
-    url: 'https://afuchserviciocentrales.cl',
-    logo: 'https://afuchserviciocentrales.cl/icon.png',
+    url: SEDE.sitioUrl,
+    logo: `${SEDE.sitioUrl}/icon.png`,
     email: SEDE.email,
     telephone: SEDE.telefono,
     address: {
@@ -59,7 +59,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="flex min-h-screen flex-col">
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger -- JSON-LD estático, sin datos de usuario.
+          // JSON-LD estático, sin datos de usuario.
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <SiteHeader />

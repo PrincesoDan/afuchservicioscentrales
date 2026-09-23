@@ -116,7 +116,10 @@ export default function PaginaQuienesSomos() {
 
           <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
             {DIRECTIVA.map(({ nombre, cargo }) => (
-              <li key={cargo} className="rounded-xl border border-slate-200 bg-white p-6 text-center">
+              <li
+                key={cargo}
+                className="rounded-xl border border-slate-200 bg-white p-6 text-center"
+              >
                 <div
                   aria-hidden="true"
                   className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-navy-100 text-2xl font-bold text-navy-400"

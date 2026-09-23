@@ -1,13 +1,14 @@
-import { contactoSchema } from '@afuch/contracts';
+import { ASUNTOS_CONTACTO, contactoSchema, formatearRut } from '@afuch/contracts';
 import { NextResponse } from 'next/server';
+import { enviarCorreo, plantilla } from '@/server/correo';
+import { env } from '@/server/env';
+import { ipDesdeCabeceras } from '@/server/peticion';
+import { permitir } from '@/server/rate-limit';
 
 /**
- * El navegador envía a este handler y no directamente al API de NestJS: al ser
- * el mismo origen se evita CORS y no se expone la URL del backend.
- *
- * Fase 1: si `AFUCH_API_URL` no está configurada, el mensaje se registra en el
- * servidor y NO se entrega. La entrega real queda operativa cuando se levante el
- * módulo `contact` del backend.
+ * Valida con el mismo schema que el navegador y envía el mensaje por correo a
+ * AFUCH. No se guarda en base de datos: el mensaje ya queda en el correo y
+ * almacenarlo solo sumaría obligaciones de Ley 21.719 (spec §6).
  */
 export async function POST(request: Request) {
   const cuerpo: unknown = await request.json().catch(() => null);
@@ -26,25 +27,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  const urlApi = process.env.AFUCH_API_URL;
-
-  if (!urlApi) {
-    console.warn(
-      '[contacto] AFUCH_API_URL no configurada: el mensaje no fue entregado.',
-      { asunto: resultado.data.asunto },
-    );
-    return NextResponse.json({ ok: true, entregado: false });
+  if (!(await permitir('contacto', ipDesdeCabeceras(request.headers)))) {
+    return NextResponse.json({ ok: false, motivo: 'limite' }, { status: 429 });
   }
 
-  const respuesta = await fetch(`${urlApi}/api/contact`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(resultado.data),
+  const { nombre, email, rut, unidad, asunto, mensaje } = resultado.data;
+  const { html, texto } = plantilla({
+    parrafos: [
+      `Nombre: ${nombre}`,
+      `Correo: ${email}`,
+      ...(rut ? [`RUT: ${formatearRut(rut)}`] : []),
+      ...(unidad ? [`Unidad o facultad: ${unidad}`] : []),
+      `Asunto: ${ASUNTOS_CONTACTO[asunto]}`,
+      ...mensaje.split(/\n{2,}/),
+    ],
   });
 
-  if (!respuesta.ok) {
+  try {
+    await enviarCorreo({
+      para: env().CORREO_CONTACTO_DESTINO,
+      asunto: `[Contacto web] ${ASUNTOS_CONTACTO[asunto]} — ${nombre}`,
+      html,
+      texto,
+      responderA: email,
+    });
+  } catch (error) {
+    console.error('[contacto] No se pudo enviar el correo.', error);
     return NextResponse.json({ ok: false }, { status: 502 });
   }
 
-  return NextResponse.json({ ok: true, entregado: true });
+  return NextResponse.json({ ok: true });
 }

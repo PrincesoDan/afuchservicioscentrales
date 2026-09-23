@@ -1,11 +1,12 @@
 import type { MetadataRoute } from 'next';
+import { SEDE } from '@/content/sede';
 import { CONVENIOS } from '@/content/convenios';
 import { NOTICIAS } from '@/content/noticias';
 
-const BASE = 'https://afuchserviciocentrales.cl';
+const BASE = SEDE.sitioUrl;
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const estaticas = ['', '/quienes-somos', '/beneficios', '/noticias', '/contacto', '/privacidad', '/socios'];
+  const estaticas = ['', '/quienes-somos', '/beneficios', '/noticias', '/contacto', '/privacidad'];
 
   return [
     ...estaticas.map((ruta) => ({ url: `${BASE}${ruta}`, lastModified: new Date() })),

@@ -13,3 +13,16 @@ playwright-report/
 test-results/
 next-env.d.ts
 *.tsbuildinfo
+
+# Planillas con datos personales de socios (Ley 21.719): nunca al repo
+info/*.xlsx
+info/*.xls
+info/*.csv
+packages/db/src/generated/
+storage/
+.storage-test/
+**/e2e/.buzon/
+**/e2e/.estado.json
+.storage-e2e/
+infra/.env
+infra/entrada/

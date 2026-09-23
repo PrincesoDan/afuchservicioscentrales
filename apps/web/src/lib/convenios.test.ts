@@ -1,6 +1,11 @@
 import type { Convenio } from '@afuch/contracts';
 import { describe, expect, it } from 'vitest';
-import { categoriasConContenido, filtrarConvenios, formatearClp, formatearFecha } from './convenios';
+import {
+  categoriasConContenido,
+  filtrarConvenios,
+  formatearClp,
+  formatearFecha,
+} from './convenios';
 
 function convenio(parcial: Partial<Convenio> & Pick<Convenio, 'slug'>): Convenio {
   return {
@@ -18,9 +23,24 @@ function convenio(parcial: Partial<Convenio> & Pick<Convenio, 'slug'>): Convenio
 }
 
 const catalogo: Convenio[] = [
-  convenio({ slug: 'optica', nombre: 'Óptica Bethel', categoria: 'salud', extensivoGrupoFamiliar: true }),
-  convenio({ slug: 'gas', nombre: 'Vales Abastible', categoria: 'gas', resumen: 'Balones de gas más baratos' }),
-  convenio({ slug: 'fondo', nombre: 'Fondo Solidario', categoria: 'solidaridad', extensivoGrupoFamiliar: true }),
+  convenio({
+    slug: 'optica',
+    nombre: 'Óptica Bethel',
+    categoria: 'salud',
+    extensivoGrupoFamiliar: true,
+  }),
+  convenio({
+    slug: 'gas',
+    nombre: 'Vales Abastible',
+    categoria: 'gas',
+    resumen: 'Balones de gas más baratos',
+  }),
+  convenio({
+    slug: 'fondo',
+    nombre: 'Fondo Solidario',
+    categoria: 'solidaridad',
+    extensivoGrupoFamiliar: true,
+  }),
 ];
 
 describe('filtrarConvenios', () => {
@@ -34,8 +54,12 @@ describe('filtrarConvenios', () => {
   });
 
   it('busca por nombre sin distinguir mayúsculas ni tildes', () => {
-    expect(filtrarConvenios(catalogo, { busqueda: 'optica' }).map((c) => c.slug)).toEqual(['optica']);
-    expect(filtrarConvenios(catalogo, { busqueda: 'ÓPTICA' }).map((c) => c.slug)).toEqual(['optica']);
+    expect(filtrarConvenios(catalogo, { busqueda: 'optica' }).map((c) => c.slug)).toEqual([
+      'optica',
+    ]);
+    expect(filtrarConvenios(catalogo, { busqueda: 'ÓPTICA' }).map((c) => c.slug)).toEqual([
+      'optica',
+    ]);
   });
 
   it('busca también en el resumen', () => {
@@ -52,7 +76,9 @@ describe('filtrarConvenios', () => {
   });
 
   it('ignora espacios sobrantes en la búsqueda', () => {
-    expect(filtrarConvenios(catalogo, { busqueda: '   fondo  ' }).map((c) => c.slug)).toEqual(['fondo']);
+    expect(filtrarConvenios(catalogo, { busqueda: '   fondo  ' }).map((c) => c.slug)).toEqual([
+      'fondo',
+    ]);
   });
 });
 

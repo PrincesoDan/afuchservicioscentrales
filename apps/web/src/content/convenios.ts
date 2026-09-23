@@ -95,7 +95,8 @@ const convenios: Convenio[] = [
       'Plan grupo familiar: $19.800 mensuales',
       'Cobertura de la Fundación Arturo López Pérez',
     ],
-    formaDeAcceso: 'Manifiesta tu interés en AFUCH Servicios Centrales para iniciar la contratación.',
+    formaDeAcceso:
+      'Manifiesta tu interés en AFUCH Servicios Centrales para iniciar la contratación.',
     formaDePago: 'Cuota mensual descontada por planilla',
     extensivoGrupoFamiliar: true,
     destacado: true,
@@ -156,7 +157,8 @@ const convenios: Convenio[] = [
       'Operativo oftalmológico gratuito por la compra de lentes ópticos',
       'Convenios con FONASA, Isapres y Bienestar del Personal U. de Chile',
     ],
-    formaDeAcceso: 'Solicita el respaldo del convenio en AFUCH Servicios Centrales antes de tu compra.',
+    formaDeAcceso:
+      'Solicita el respaldo del convenio en AFUCH Servicios Centrales antes de tu compra.',
     formaDePago: 'Descuento por planilla en hasta 4 meses',
     extensivoGrupoFamiliar: true,
     destacado: false,
@@ -174,7 +176,8 @@ const convenios: Convenio[] = [
       'Operativo oftalmológico gratuito por la compra de lentes ópticos',
       'Convenios con FONASA, Isapres y Bienestar del Personal U. de Chile',
     ],
-    formaDeAcceso: 'Solicita el respaldo del convenio en AFUCH Servicios Centrales antes de tu compra.',
+    formaDeAcceso:
+      'Solicita el respaldo del convenio en AFUCH Servicios Centrales antes de tu compra.',
     formaDePago: 'Descuento por planilla',
     extensivoGrupoFamiliar: true,
     destacado: false,
@@ -184,14 +187,13 @@ const convenios: Convenio[] = [
     slug: 'clinica-dental-alto-valle',
     nombre: 'Clínica Dental Alto Valle',
     categoria: 'salud',
-    resumen: '20% de descuento en atención dental, con pago en cuotas por planilla y cobertura familiar.',
+    resumen:
+      '20% de descuento en atención dental, con pago en cuotas por planilla y cobertura familiar.',
     descripcion:
       'Convenio de atención dental con descuento directo y pago pactado en cuotas descontadas por planilla. El beneficio se extiende al grupo familiar del trabajador o trabajadora.',
-    beneficios: [
-      '20% de descuento',
-      'Pago pactado en cuotas descontadas por planilla',
-    ],
-    formaDeAcceso: 'Solicita el respaldo del convenio en AFUCH Servicios Centrales antes de tu atención.',
+    beneficios: ['20% de descuento', 'Pago pactado en cuotas descontadas por planilla'],
+    formaDeAcceso:
+      'Solicita el respaldo del convenio en AFUCH Servicios Centrales antes de tu atención.',
     formaDePago: 'Cuotas pactadas y descontadas por planilla',
     extensivoGrupoFamiliar: true,
     destacado: false,

@@ -29,10 +29,18 @@ export default function PaginaPrivacidad() {
               <p>
                 {SEDE.nombre} es el responsable del tratamiento de los datos personales recogidos a
                 través de este sitio. Puedes contactarnos en{' '}
-                <a href={`mailto:${SEDE.email}`} className="font-semibold text-navy-600 underline underline-offset-2">
+                <a
+                  href={`mailto:${SEDE.email}`}
+                  className="font-semibold text-navy-600 underline underline-offset-2"
+                >
                   {SEDE.email}
                 </a>
                 .
+              </p>
+              <p>
+                Agencia La Palanca actúa como encargada del tratamiento: desarrolla y mantiene el
+                sitio, y carga la información del área de socios únicamente según las instrucciones
+                escritas de {SEDE.nombre}, sin cederla a terceros ni usarla para otros fines.
               </p>
             </Articulo>
 
@@ -43,16 +51,30 @@ export default function PaginaPrivacidad() {
                 facultad.
               </p>
               <p>
-                No usamos cookies de seguimiento ni herramientas de analítica de terceros en la
-                sección pública de este sitio.
+                En el área privada de socios tratamos los datos de la nómina que nos entrega{' '}
+                {SEDE.nombre} (RUT, nombre y unidad o facultad), el detalle mensual de tus
+                descuentos por planilla, el correo que ingresas al registrarte, tu contraseña
+                (guardada como hash irreversible, nunca en texto legible) y un registro de accesos
+                con fecha e IP.
+              </p>
+              <p>
+                No usamos cookies de seguimiento ni herramientas de analítica de terceros. El área
+                privada usa una única cookie de sesión, necesaria para mantenerte conectado.
               </p>
             </Articulo>
 
             <Articulo titulo="Para qué los usamos">
               <p>
                 Únicamente para responder la consulta que nos envías y, cuando corresponda, para
-                gestionar tu afiliación o tu solicitud sobre un convenio. No cedemos tus datos a
-                terceros ni los usamos con fines distintos de aquel para el que los entregaste.
+                gestionar tu afiliación o tu solicitud sobre un convenio. En el área privada, para
+                que consultes tus descuentos y la rendición de cuentas de la asociación. No cedemos
+                tus datos a terceros ni los usamos con fines distintos de aquel para el que los
+                entregaste.
+              </p>
+              <p>
+                Los correos del sitio (respuestas de contacto, confirmación de cuenta y recuperación
+                de contraseña) se envían a través de un proveedor de envío de correo electrónico
+                (Resend), que solo los procesa para entregarlos.
               </p>
             </Articulo>
 
@@ -62,14 +84,20 @@ export default function PaginaPrivacidad() {
                 institucional y se conservan solo el tiempo necesario para resolver la consulta.
                 Este sitio no almacena los mensajes en una base de datos.
               </p>
+              <p>
+                Los datos del área privada se conservan mientras seas socio o socia. Si dejas de
+                serlo, tu cuenta se desactiva y los datos se eliminan cuando {SEDE.nombre} lo
+                instruya o cuando ejerzas tu derecho de supresión.
+              </p>
             </Articulo>
 
             <Articulo titulo="Datos sensibles">
               <p>
                 La información sobre afiliación sindical y sobre descuentos por planilla constituye
                 dato personal sensible bajo la Ley 21.719. Ese tipo de información no se recoge ni
-                se muestra en la sección pública de este sitio: vivirá exclusivamente en el área
-                privada de socios, protegida por autenticación y cifrado.
+                se muestra en la sección pública de este sitio: vive exclusivamente en el área
+                privada de socios, protegida por autenticación y cifrado, y cada socio ve solo la
+                suya.
               </p>
             </Articulo>
 
@@ -78,11 +106,17 @@ export default function PaginaPrivacidad() {
                 Puedes solicitar en cualquier momento el acceso, la rectificación, la supresión o la
                 portabilidad de tus datos, así como oponerte a su tratamiento. Para ejercer
                 cualquiera de estos derechos, escríbenos a{' '}
-                <a href={`mailto:${SEDE.email}`} className="font-semibold text-navy-600 underline underline-offset-2">
+                <a
+                  href={`mailto:${SEDE.email}`}
+                  className="font-semibold text-navy-600 underline underline-offset-2"
+                >
                   {SEDE.email}
                 </a>{' '}
                 o a través del{' '}
-                <Link href="/contacto" className="font-semibold text-navy-600 underline underline-offset-2">
+                <Link
+                  href="/contacto"
+                  className="font-semibold text-navy-600 underline underline-offset-2"
+                >
                   formulario de contacto
                 </Link>
                 .
@@ -91,9 +125,9 @@ export default function PaginaPrivacidad() {
 
             <Articulo titulo="Seguridad">
               <p>
-                El sitio opera sobre conexión cifrada (HTTPS). Los datos sensibles del área privada
-                de socios se almacenarán cifrados, con registro de accesos y respaldo automático
-                diario, según el estándar que exige la Ley 21.719.
+                El sitio opera sobre conexión cifrada (HTTPS). Los datos personales del área privada
+                se almacenan cifrados, con registro de accesos y de acciones administrativas y
+                respaldo automático diario cifrado, según el estándar que exige la Ley 21.719.
               </p>
             </Articulo>
           </div>

@@ -1,0 +1,159 @@
+// Modelo del área privada de socios. Ver docs/superpowers/plans/2026-09-23-plan-cierre-propuesta.md §6.
+//
+// Los datos personales (RUT, nombre, correo, secreto TOTP) se guardan cifrados
+// por la aplicación (AES-256-GCM). `rutHash` es un índice ciego (HMAC-SHA256)
+// para buscar por RUT sin guardarlo en claro.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  // Importaciones sin extensión: las resuelven igual Next (webpack), Vitest y tsx.
+  importFileExtension = ""
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Socio {
+  id              String   @id @default(cuid())
+  rutHash         String   @unique
+  rutCifrado      String
+  nombreCifrado   String
+  facultad        String?
+  /// Solo un admin cambia este valor (decisión D6): importar una planilla nunca deshabilita.
+  habilitado      Boolean  @default(true)
+  /// Último periodo importado en que el RUT apareció en ASOCIACI. Sirve para
+  /// listar ausentes; no deshabilita por sí solo.
+  ultimoPeriodoId String?
+  creadoEn        DateTime @default(now())
+  actualizadoEn   DateTime @updatedAt
+
+  cuenta     Cuenta?
+  descuentos LineaDescuento[]
+}
+
+model Cuenta {
+  id               String    @id @default(cuid())
+  socioId          String    @unique
+  correoCifrado    String
+  passwordHash     String?
+  verificadaEn     DateTime?
+  intentosFallidos Int       @default(0)
+  bloqueadaHasta   DateTime?
+  creadaEn         DateTime  @default(now())
+
+  socio  Socio   @relation(fields: [socioId], references: [id], onDelete: Cascade)
+  tokens Token[]
+}
+
+enum TipoToken {
+  VERIFICACION
+  RECUPERACION
+}
+
+model Token {
+  id        String    @id @default(cuid())
+  cuentaId  String
+  /// SHA-256 del token enviado por correo; el token en claro nunca se guarda.
+  tokenHash String    @unique
+  tipo      TipoToken
+  expiraEn  DateTime
+  usadoEn   DateTime?
+  creadoEn  DateTime  @default(now())
+
+  cuenta Cuenta @relation(fields: [cuentaId], references: [id], onDelete: Cascade)
+
+  @@index([cuentaId, tipo])
+}
+
+model Periodo {
+  id           String   @id @default(cuid())
+  anio         Int
+  mes          Int
+  importadoEn  DateTime @default(now())
+  importadoPor String
+
+  lineas LineaDescuento[]
+
+  @@unique([anio, mes])
+}
+
+enum ConceptoDescuento {
+  CUOTA_SOCIAL
+  FONDO_SOLIDARIO
+  ACCIONES_COOPEUCH
+  PRESTAMO_COOPEUCH
+  LIBRETA_AHORRO
+  SEGURO_ONCOLOGICO_FALP
+  OPTICA_GO_OPTIC
+  REINTEGRO_BONO_INVIERNO
+  GAS_ABASTIBLE
+  PRESTAMO_AFUCH
+}
+
+model LineaDescuento {
+  id            String            @id @default(cuid())
+  periodoId     String
+  socioId       String
+  concepto      ConceptoDescuento
+  monto         Int
+  /// Solo PRESTAMO_AFUCH: [{ cuota, total }] por préstamo, en el orden de la planilla.
+  detalleCuotas Json?
+
+  periodo Periodo @relation(fields: [periodoId], references: [id], onDelete: Cascade)
+  socio   Socio   @relation(fields: [socioId], references: [id], onDelete: Cascade)
+
+  @@index([socioId, periodoId])
+}
+
+model DocumentoRendicion {
+  id           String   @id @default(cuid())
+  titulo       String
+  categoria    String
+  /// Fecha del documento (no de publicación).
+  fecha        DateTime @db.Date
+  /// Nombre del archivo dentro de STORAGE_DIR/rendicion.
+  archivo      String   @unique
+  tamano       Int
+  publicadoEn  DateTime @default(now())
+  publicadoPor String
+}
+
+model Administrador {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  passwordHash      String
+  totpSecretCifrado String
+  activo            Boolean  @default(true)
+  creadoEn          DateTime @default(now())
+}
+
+enum ActorTipo {
+  SOCIO
+  ADMIN
+  SISTEMA
+  ANONIMO
+}
+
+model RegistroAuditoria {
+  id        String    @id @default(cuid())
+  actorTipo ActorTipo
+  actorId   String?
+  accion    String
+  entidad   String?
+  entidadId String?
+  ip        String?
+  detalle   Json?
+  fecha     DateTime  @default(now())
+
+  @@index([fecha])
+  @@index([entidad, entidadId])
+}
+
+/// Tabla que usa rate-limiter-flexible (RateLimiterPrisma). No se usa directamente.
+model RateLimiterFlexible {
+  key    String    @id
+  points Int
+  expire DateTime?
+}
