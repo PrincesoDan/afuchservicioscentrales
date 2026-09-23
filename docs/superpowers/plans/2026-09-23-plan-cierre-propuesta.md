@@ -270,7 +270,7 @@ módulos nativos).
 - [x] Rendición: publicar / retirar PDF.
 - [x] Socios: buscar, habilitar/deshabilitar, anular cuenta, deshabilitar ausentes del último mes (D6).
 - [x] Auditoría paginada.
-- [x] CLI (`pnpm cli ayuda`): `planilla:importar`, `rendicion:publicar`, `rendicion:listar`, `socio:estado`, `socio:activar`, `socio:desactivar`, `socio:anular-cuenta`, `socio:exportar`, `socio:eliminar`, `socios:ausentes`, `admin:crear`, `admin:desactivar`.
+- [x] CLI (`pnpm cli ayuda`): `planilla:importar`, `rendicion:publicar`, `rendicion:listar`, `socio:estado`, `socio:activar`, `socio:desactivar`, `socio:anular-cuenta`, `socio:exportar`, `socio:eliminar`, `socios:ausentes`, `admin:crear`, `admin:desactivar`, `planilla:ficticia`, `claves:rotar`.
 
 ### Etapa 6 — Infraestructura VPS (2.4, §6) ✅ (código) / ⏳ (VPS)
 - [x] `infra/Dockerfile` (standalone, usuario no root) + imagen `herramientas` para migraciones y CLI.
@@ -278,7 +278,7 @@ módulos nativos).
 - [x] `infra/respaldo/respaldar.sh` y `restaurar.sh` (cifrado AES-256, copia externa con rclone, retención 30 días).
 - [x] Runbook: `docs/operacion/runbook.md`.
 - [ ] Ejecutar en el VPS real y probar la restauración (requiere P10, P11).
-- [ ] Rotación de `CLAVE_CIFRADO` / `CLAVE_HMAC`: sin script de recifrado (documentado como pendiente en el runbook §10).
+- [x] Rotación de `CLAVE_CIFRADO` / `CLAVE_HMAC`: `pnpm cli claves:rotar` (transaccional, con verificación previa y posterior; runbook §10.1).
 
 ### Etapa 7 — Cumplimiento Ley 21.719 (2.4, §7.2) ✅ (borradores)
 - [x] `docs/cumplimiento/instrucciones-tratamiento-datos.md` (borrador para revisión legal y firma).

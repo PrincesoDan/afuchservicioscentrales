@@ -8,10 +8,32 @@ function clave(): Buffer {
   return Buffer.from(env().CLAVE_CIFRADO, 'base64');
 }
 
+function claveHmac(): Buffer {
+  return Buffer.from(env().CLAVE_HMAC, 'base64');
+}
+
 /** AES-256-GCM. Formato: `v1.<iv>.<tag>.<texto cifrado>`, todo en base64url. */
 export function cifrar(texto: string): string {
+  return cifrarCon(clave(), texto);
+}
+
+export function descifrar(valor: string): string {
+  return descifrarCon(clave(), valor);
+}
+
+/** Índice ciego: permite buscar por RUT (ya normalizado) sin guardarlo en claro. */
+export function hashRut(rutNormalizado: string): string {
+  return hashRutCon(claveHmac(), rutNormalizado);
+}
+
+/*
+ * Variantes con clave explícita. Las usa la rotación de claves, que necesita
+ * leer con la clave actual y escribir con la nueva en la misma pasada.
+ */
+
+export function cifrarCon(claveAes: Buffer, texto: string): string {
   const iv = randomBytes(12);
-  const cifrador = createCipheriv('aes-256-gcm', clave(), iv);
+  const cifrador = createCipheriv('aes-256-gcm', claveAes, iv);
   const cifrado = Buffer.concat([cifrador.update(texto, 'utf8'), cifrador.final()]);
   const tag = cifrador.getAuthTag();
   return [VERSION, iv, tag, cifrado]
@@ -19,12 +41,12 @@ export function cifrar(texto: string): string {
     .join('.');
 }
 
-export function descifrar(valor: string): string {
+export function descifrarCon(claveAes: Buffer, valor: string): string {
   const [version, iv, tag, cifrado] = valor.split('.');
   if (version !== VERSION || !iv || !tag || cifrado === undefined) {
     throw new Error('Valor cifrado con formato desconocido.');
   }
-  const descifrador = createDecipheriv('aes-256-gcm', clave(), Buffer.from(iv, 'base64url'));
+  const descifrador = createDecipheriv('aes-256-gcm', claveAes, Buffer.from(iv, 'base64url'));
   descifrador.setAuthTag(Buffer.from(tag, 'base64url'));
   return Buffer.concat([
     descifrador.update(Buffer.from(cifrado, 'base64url')),
@@ -32,11 +54,8 @@ export function descifrar(valor: string): string {
   ]).toString('utf8');
 }
 
-/** Índice ciego: permite buscar por RUT (ya normalizado) sin guardarlo en claro. */
-export function hashRut(rutNormalizado: string): string {
-  return createHmac('sha256', Buffer.from(env().CLAVE_HMAC, 'base64'))
-    .update(rutNormalizado)
-    .digest('hex');
+export function hashRutCon(claveHmacExplicita: Buffer, rutNormalizado: string): string {
+  return createHmac('sha256', claveHmacExplicita).update(rutNormalizado).digest('hex');
 }
 
 /** Token de un solo uso para enlaces de correo. Se envía `token`; se guarda `hash`. */

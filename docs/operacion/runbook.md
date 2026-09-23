@@ -146,7 +146,38 @@ sus descuentos. Registrar fecha y resultado.
 | `RESEND_API_KEY` | Crear nueva en Resend, cambiar en `.env`, `dc up -d`, revocar la anterior | — |
 | Contraseña/TOTP de un admin | `pnpm cli admin:crear <email>` (reinicia ambos) | — |
 | Baja de un admin | `pnpm cli admin:desactivar <email>` | Pierde acceso de inmediato. |
-| `CLAVE_CIFRADO` / `CLAVE_HMAC` | **No hay rotación automática.** Requiere un script que descifre y vuelva a cifrar todos los registros; queda pendiente. Rotar solo ante sospecha de filtración. | — |
+| `CLAVE_CIFRADO` / `CLAVE_HMAC` | `pnpm cli claves:rotar` (sección 10.1) | Recifra RUT, nombres, correos y secretos TOTP; recalcula el índice del RUT. Sesiones, contraseñas y códigos TOTP siguen funcionando. |
+
+### 10.1 Rotar `CLAVE_CIFRADO` y/o `CLAVE_HMAC`
+
+Cuándo: ante sospecha de filtración de `infra/.env` o de una clave, al dar de baja a alguien
+que tuvo acceso a las claves, o como higiene periódica. Se puede rotar una sola o ambas.
+
+1. **Respaldo manual** antes de empezar: `/opt/afuch/infra/respaldo/respaldar.sh`.
+2. **Detener la app** (mientras corre la rotación y hasta cambiar el `.env`, la app con las
+   claves viejas no puede leer la base):
+   ```bash
+   dc stop web
+   ```
+3. **Generar las claves nuevas** y guardarlas en el gestor de contraseñas:
+   ```bash
+   openssl rand -base64 32   # CLAVE_CIFRADO_NUEVA
+   openssl rand -base64 32   # CLAVE_HMAC_NUEVA (distinta)
+   ```
+4. **Vista previa** (solo comprueba que todo se descifra con las claves actuales):
+   ```bash
+   dc run --rm -e CLAVE_CIFRADO_NUEVA='…' -e CLAVE_HMAC_NUEVA='…' herramientas pnpm cli claves:rotar
+   ```
+   Para rotar solo una, pasa solo esa variable.
+5. **Aplicar**: mismo comando con `--confirmar`. Todo ocurre en una transacción que, antes de
+   confirmar, relee cada registro con las claves nuevas; si algo no calza, se revierte entero.
+6. **Actualizar `infra/.env`**: `CLAVE_CIFRADO` y/o `CLAVE_HMAC` pasan a ser los valores nuevos.
+7. **Levantar**: `dc up -d web`. Verificar ingresando como socio de prueba y en `/admin`.
+8. **Conservar las claves anteriores** (con fecha) hasta que venza el último respaldo cifrado
+   con ellas (30 días por defecto): para restaurar un respaldo viejo se usa el `.env` de su época.
+
+Si el paso 4 o 5 informa valores que no se pueden descifrar, las claves de `infra/.env` no son
+las que cifraron la base: no continúes y revisa el historial de claves en el gestor.
 
 ## 11. Incidentes
 

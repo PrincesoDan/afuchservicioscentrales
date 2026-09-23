@@ -26,3 +26,7 @@ storage/
 .storage-e2e/
 infra/.env
 infra/entrada/
+.buzon/
+
+# Salida generada por graphify (puede indexar info/, incluida la planilla)
+graphify-out/

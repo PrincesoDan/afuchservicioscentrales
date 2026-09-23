@@ -4,16 +4,20 @@ test('navegación principal del sitio público', async ({ page, isMobile }) => {
   await page.goto('/');
   await expect(page).toHaveTitle(/AFUCH Servicios Centrales/);
 
-  for (const [texto, ruta, titulo] of [
-    ['Quiénes somos', '/quienes-somos', /Quiénes somos/],
-    ['Convenios y beneficios', '/beneficios', /Convenios/],
-    ['Noticias', '/noticias', /Noticias/],
-    ['Contacto', '/contacto', /Contacto/],
+  // En celular la navegación es la barra inferior, con etiquetas cortas.
+  for (const [escritorio, movil, ruta, titulo] of [
+    ['Quiénes somos', 'Nosotros', '/quienes-somos', /Quiénes somos/],
+    ['Convenios y beneficios', 'Beneficios', '/beneficios', /Convenios/],
+    ['Noticias', 'Noticias', '/noticias', /Noticias/],
+    ['Contacto', 'Contacto', '/contacto', /Contacto/],
+    ['Inicio', 'Inicio', '/', /AFUCH Servicios Centrales/],
   ] as const) {
-    if (isMobile) await page.getByRole('button', { name: 'Abrir menú' }).click();
     await page
-      .getByRole('navigation', { name: /Navegación principal/ })
-      .getByRole('link', { name: texto })
+      .getByRole('navigation', {
+        name: isMobile ? 'Navegación principal móvil' : 'Navegación principal',
+        exact: true,
+      })
+      .getByRole('link', { name: isMobile ? movil : escritorio, exact: true })
       .click();
     await expect(page).toHaveURL(ruta);
     await expect(page).toHaveTitle(titulo);

@@ -1,6 +1,7 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import type { ReactNode } from 'react';
+import { BarraInferior } from '@/components/barra-inferior';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { SEDE } from '@/content/sede';
@@ -35,6 +36,9 @@ export const metadata: Metadata = {
   icons: { icon: '/icon.png' },
 };
 
+/** `viewport-fit=cover` habilita `env(safe-area-inset-bottom)` para la barra inferior en iPhone. */
+export const viewport: Viewport = { viewportFit: 'cover', themeColor: '#00205c' };
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -56,7 +60,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
   return (
     <html lang="es-CL" className={inter.variable}>
-      <body className="flex min-h-screen flex-col">
+      {/* En celular se reserva el alto de la barra inferior para que no tape el footer. */}
+      <body className="flex min-h-screen flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
         <script
           type="application/ld+json"
           // JSON-LD estático, sin datos de usuario.
@@ -67,6 +72,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           {children}
         </main>
         <SiteFooter />
+        <BarraInferior />
       </body>
     </html>
   );

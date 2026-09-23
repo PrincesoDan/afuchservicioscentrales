@@ -34,6 +34,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   poweredByHeader: false,
+  // Solo desarrollo: el indicador de Next taparía la barra inferior en celular.
+  devIndicators: { position: 'top-right' },
   transpilePackages: ['@afuch/contracts', '@afuch/db'],
   serverExternalPackages: ['@node-rs/argon2', 'exceljs', 'rate-limiter-flexible'],
   // La planilla mensual pesa ~650 KB y los PDF de rendición hasta 20 MB.
