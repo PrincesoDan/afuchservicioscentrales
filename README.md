@@ -15,6 +15,7 @@ Tiene tres partes:
 Documentos clave:
 
 - Plan, decisiones y estado: [`docs/superpowers/plans/2026-09-23-plan-cierre-propuesta.md`](docs/superpowers/plans/2026-09-23-plan-cierre-propuesta.md)
+- Ajustes tras la reunión con AFUCH del 2026-10-11 (registro por correo, FENAFUCH, conceptos ocultos): [`docs/superpowers/plans/2026-10-11-plan-ajustes-reunion-clientas.md`](docs/superpowers/plans/2026-10-11-plan-ajustes-reunion-clientas.md)
 - Diseño del sitio público: [`docs/superpowers/specs/2026-09-04-afuch-landing-design.md`](docs/superpowers/specs/2026-09-04-afuch-landing-design.md)
 - Operación en producción (VPS): [`docs/operacion/runbook.md`](docs/operacion/runbook.md)
 - Protección de datos (Ley 21.719): [`docs/cumplimiento/`](docs/cumplimiento/)
@@ -98,26 +99,38 @@ pnpm dev                                   # http://localhost:3000
 
 ### Datos de prueba
 
-La planilla real tiene datos personales y no se usa para desarrollo. Hay una planilla
-ficticia con la misma estructura:
+La planilla real tiene datos personales y no se usa para desarrollo. Hay dos formas de
+cargar datos inventados:
+
+**A. Socios ficticios con correos reales** (para revisar el flujo completo, con correos que
+llegan de verdad). Parte de un Excel con las columnas `Nombre`, `Apellido paterno`,
+`Apellido materno` y `Mail` (hasta 9 personas; por ejemplo `info/test-1.xlsx`). A cada
+persona le asigna un RUT ficticio (`11.111.111-1`, `22.222.222-2`, …), su correo y dos meses
+de descuentos inventados (agosto y septiembre de 2026):
+
+```bash
+pnpm cli prueba:cargar ../../info/test-1.xlsx              # vista previa
+pnpm cli prueba:cargar ../../info/test-1.xlsx --confirmar
+pnpm cli admin:crear tu@correo.cl           # imprime contraseña y secreto TOTP una sola vez
+```
+
+(`pnpm cli` se ejecuta dentro de `apps/web`: las rutas relativas parten desde ahí.)
+
+**B. Planilla ficticia + correos a mano** (sin correos reales):
 
 ```bash
 pnpm cli planilla:ficticia /tmp/planilla-ficticia.xlsx
 pnpm cli planilla:importar /tmp/planilla-ficticia.xlsx --confirmar
-pnpm cli admin:crear tu@correo.cl           # imprime contraseña y secreto TOTP una sola vez
+pnpm cli socio:correo 11.111.111-1 socia@example.com
 ```
 
-Socios ficticios que quedan cargados (agosto 2026):
+Deja a `11.111.111-1` PRUEBA UNO SOCIA, `12.222.222-5` PRUEBA DOS SOCIO y `13.333.333-9`
+PRUEBA TRES SIN DESCUENTOS.
 
-| RUT            | Nombre                                            |
-| -------------- | ------------------------------------------------- |
-| `11.111.111-1` | PRUEBA UNO SOCIA (con préstamo AFUCH en 2 cuotas) |
-| `12.222.222-5` | PRUEBA DOS SOCIO                                  |
-| `13.333.333-9` | PRUEBA TRES SIN DESCUENTOS                        |
-
-Para crear una cuenta de socio: `/socios/registro` con uno de esos RUT y cualquier correo.
-Sin `RESEND_API_KEY` el correo **no se envía**: el enlace de verificación aparece en la
-consola de `pnpm dev` (y en `CORREO_BUZON_DIR` si está definido).
+**Correos.** Con `RESEND_API_KEY` en `apps/web/.env` los correos **se envían de verdad**
+desde `CORREO_REMITENTE` (por defecto `contacto@afuchscen.cl`). Sin la clave no se envía
+nada: el enlace aparece en la consola de `pnpm dev` (y en `CORREO_BUZON_DIR` si está
+definido). Los tests y los e2e nunca envían correos.
 
 Para el admin: `/admin/ingreso` con el correo, la contraseña impresa y el código de 6
 dígitos de una app autenticadora (Google Authenticator, 1Password, etc.) donde se cargó el
@@ -126,6 +139,55 @@ secreto TOTP. Para obtener un código sin app:
 ```bash
 cd apps/web && node -e "import('otplib').then(o=>console.log(o.generateSync({secret:'SECRETO'})))"
 ```
+
+### Revisión manual (lista de comprobación)
+
+Con la opción A cargada y `pnpm dev` corriendo en <http://localhost:3000>:
+
+**Sitio público**
+
+- [ ] Portada: aparece el bloque «AFUCH Servicios Centrales es parte de la FENAFUCH».
+- [ ] `/beneficios` y `/quienes-somos`: aparece el mismo texto; el pie de página lo resume.
+- [ ] `/contacto` y el pie: **no** hay horarios de atención. Teléfono y dirección siguen con
+      los valores anteriores (pendiente de AFUCH).
+- [ ] `/quienes-somos`: la directiva sigue como «Por confirmar» (faltan nombres y fotos).
+
+**Registro e ingreso con correo**
+
+- [ ] `/socios/registro` pide **solo el correo** (no hay campo RUT).
+- [ ] Con un correo del Excel de prueba: llega un mensaje desde `contacto@afuchscen.cl` con
+      el enlace; al abrirlo se define la contraseña (mínimo 10 caracteres).
+- [ ] Con un correo que no está cargado: la pantalla muestra **el mismo mensaje** y no llega
+      nada.
+- [ ] `/socios`: se ingresa con correo + contraseña. Con la contraseña mala dice «Correo o
+      contraseña incorrectos».
+- [ ] `/socios/recuperar`: pide el correo y llega un enlace para cambiar la contraseña.
+- [ ] Registrarse otra vez con un correo que ya tiene cuenta: llega «Ya tienes una cuenta de
+      socio» y no se crea otra.
+
+**Área privada**
+
+- [ ] «Mis descuentos» muestra septiembre y agosto de 2026 en el historial.
+- [ ] En la tabla **no** aparecen «Convenio óptica Go Optic» ni «Reintegro bono de
+      invierno», aunque la base de prueba los trae ($15.000 y $30.000 por mes): el total no
+      los suma y hay una nota que lo advierte.
+- [ ] «Mis datos» muestra nombre, RUT ficticio y correo; no hay nada editable.
+
+**Administración** (`/admin/ingreso`)
+
+- [ ] «Correos de socios»: el estado muestra cuántos socios tienen correo.
+- [ ] «Agregar o corregir un correo»: cambiar el correo de `22.222.222-2` → ese socio
+      ingresa con el correo nuevo y, si ya tenía cuenta, recibe un aviso en el anterior.
+- [ ] Subir una lista `.xlsx` con columnas `RUT` y `Mail`: la vista previa cuenta nuevos,
+      cambios, RUT que no son socios y errores por número de fila; «Cargar» la aplica.
+- [ ] «Socios»: el filtro «Sin correo cargado» lista a quienes aún no pueden registrarse.
+- [ ] «Planilla mensual»: la vista previa sí muestra Go Optic y Reintegro bono de invierno
+      (el admin ve el dato completo).
+- [ ] «Auditoría»: aparecen `correos.importados`, `socio.correo_definido`,
+      `registro.solicitado`, `ingreso.exitoso`, sin correos ni RUT en el detalle.
+
+Para empezar de cero: `docker compose -f infra/docker-compose.dev.yml down -v`, volver a
+levantar, `pnpm --filter @afuch/db migrate:deploy` y repetir la carga.
 
 ### Apagar
 
@@ -193,18 +255,21 @@ y límite de 5 envíos por hora por IP, y envía el mensaje por correo (no se gu
 
 ### Área de socios
 
-1. **Registro** (`/socios/registro`): RUT + correo. Solo funciona si el RUT está en alguna
-   planilla importada (hoja `ASOCIACI`) y el socio está habilitado. La respuesta es la misma
-   para socios y no socios, para no revelar quién está en la nómina.
-2. **Verificación**: llega un enlace al correo (vence en 24 h); ahí se define la contraseña.
-3. **Ingreso** (`/socios`): RUT + contraseña. 5 intentos fallidos bloquean la cuenta 15 min.
-4. **Recuperación** (`/socios/recuperar`): enlace al correo registrado (vence en 1 h).
-5. **Vistas**: Mis descuentos (detalle por concepto, cuotas del préstamo AFUCH, historial),
-   Rendición de cuentas (PDF en el navegador) y Mis datos (solo lectura).
+1. **Correo precargado**: AFUCH entrega una lista validada (RUT + correo) que se carga en
+   `/admin/correos` o con el CLI. Sin correo cargado el socio no puede registrarse.
+2. **Registro** (`/socios/registro`): solo el correo. Funciona si coincide con el que AFUCH
+   cargó y el socio está habilitado. La respuesta es la misma para socios y no socios, para
+   no revelar quién está en la nómina.
+3. **Verificación**: llega un enlace a ese correo (vence en 24 h); ahí se define la contraseña.
+4. **Ingreso** (`/socios`): correo + contraseña. 5 intentos fallidos bloquean la cuenta 15 min.
+5. **Recuperación** (`/socios/recuperar`): enlace al correo (vence en 1 h).
+6. **Vistas**: Mis descuentos (detalle por concepto, cuotas del préstamo AFUCH, historial),
+   Rendición de cuentas (PDF en el navegador) y Mis datos (solo lectura). «Mis descuentos»
+   no muestra ni suma «Convenio óptica Go Optic» ni «Reintegro bono de invierno» (D12).
 
-Si un RUT ya tiene cuenta, un nuevo registro no la cambia y avisa al correo registrado. Si
-alguien registró un RUT ajeno, un admin usa **Anular cuenta** y el dueño se registra de nuevo.
-Detalle y riesgos: plan §3.1.
+El RUT ya no se pide en ningún formulario público: sigue siendo la llave de la planilla. Si
+un socio cambia de correo, un admin lo corrige en `/admin/correos`; **Anular cuenta** obliga
+a registrarse de nuevo. Decisiones D4′ y D10–D13: plan de ajustes del 2026-10-11.
 
 ### Planilla mensual
 
@@ -218,7 +283,8 @@ Formato completo y nombre visible de cada concepto: plan §3.2 y §5.
 `/admin` (correo + contraseña + código TOTP):
 
 - **Planilla mensual**: vista previa (periodo, socios, totales por concepto, advertencias) y luego importar.
-- **Socios**: buscar por RUT o nombre, habilitar/deshabilitar, anular cuenta, deshabilitar en bloque a los ausentes del último mes.
+- **Correos de socios**: cargar la lista RUT + Mail con vista previa, y agregar o corregir un correo.
+- **Socios**: buscar por RUT o nombre, filtrar a quienes no tienen correo, habilitar/deshabilitar, anular cuenta, deshabilitar en bloque a los ausentes del último mes.
 - **Rendición de cuentas**: publicar y retirar PDF.
 - **Auditoría**: todos los accesos y acciones administrativas.
 
@@ -232,10 +298,13 @@ pnpm cli ayuda
 | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
 | `planilla:importar <archivo.xlsx> [--confirmar]`                               | Sin `--confirmar` solo muestra la vista previa                         |
 | `planilla:ficticia <salida.xlsx>`                                              | Genera una planilla de prueba con datos inventados                     |
+| `correos:importar <archivo.xlsx> [--confirmar]`                                | Carga los correos de los socios (columnas `RUT` y `Mail`)              |
+| `prueba:cargar <padron.xlsx> [--confirmar]`                                    | Solo desarrollo: socios ficticios con los correos del Excel            |
 | `rendicion:publicar <archivo.pdf> --titulo T --categoria C --fecha AAAA-MM-DD` | Publica un documento                                                   |
 | `rendicion:listar`                                                             | Lista documentos publicados                                            |
 | `socio:estado <rut>`                                                           | Ficha del socio                                                        |
 | `socio:activar <rut>` / `socio:desactivar <rut>`                               | Habilita o deshabilita                                                 |
+| `socio:correo <rut> <correo>`                                                  | Asigna o corrige el correo con que el socio se registra e ingresa      |
 | `socio:anular-cuenta <rut>`                                                    | Borra la cuenta de acceso (no los descuentos)                          |
 | `socio:exportar <rut>`                                                         | Derecho de acceso: todo lo guardado del socio, en JSON                 |
 | `socio:eliminar <rut> --confirmar`                                             | Derecho de supresión: borra socio, cuenta y descuentos                 |
@@ -248,7 +317,7 @@ Todo lo que hace el CLI queda en la auditoría con el usuario del sistema operat
 
 ## 7. Seguridad (resumen)
 
-- RUT, nombre, correo y secretos TOTP **cifrados** en la base (AES-256-GCM); búsqueda por RUT con HMAC.
+- RUT, nombre, correo y secretos TOTP **cifrados** en la base (AES-256-GCM); búsqueda por RUT y por correo con HMAC.
 - Contraseñas con **Argon2id**; nadie puede verlas.
 - Sesiones JWT en cookie `httpOnly`, revalidadas contra la base en cada página privada.
 - Rate limiting en Postgres (contacto, registro, recuperación, ingresos).
@@ -306,7 +375,14 @@ Respaldos: `infra/respaldo/respaldar.sh` (cron diario) y `restaurar.sh`.
 
 ## 11. Pendientes
 
-**Del lado de AFUCH** (plan §9):
+**Del lado de AFUCH** (plan §9 y plan de ajustes §2):
+
+- **Lista de correos validada** (RUT + correo) para cargar en `/admin/correos`. El cruce
+  preliminar con el padrón dejó 134 socios sin correo y 6 RUT con dígito verificador inválido.
+- Teléfono y dirección nuevos; clasificación de convenios (AFUCH SC / FENAFUCH); fotografías
+  y nómina de la directiva.
+- Confirmar si se mantiene la mención al «bono de invierno anual» del Fondo Solidario y si
+  se enlaza al sitio de FENAFUCH.
 
 - Canal para entregar la planilla cada mes (P7), sin usar WhatsApp.
 - Plazos de retención de historial y respaldos (P8; hoy respaldos 30 días por defecto).

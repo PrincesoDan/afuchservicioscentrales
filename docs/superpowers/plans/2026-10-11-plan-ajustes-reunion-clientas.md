@@ -1,7 +1,12 @@
 # Plan — Ajustes tras la reunión con AFUCH (2026-10-11)
 
 Complementa `2026-09-23-plan-cierre-propuesta.md`. Reemplaza la decisión **D4** (registro) y
-agrega las decisiones **D10–D13**. Nada de esto está implementado todavía.
+agrega las decisiones **D10–D13**.
+
+**Estado (2026-10-11):** implementado todo lo que no depende de AFUCH. Quedan C2 (teléfono
+y dirección) y los datos de C5 y C6 (clasificación de convenios, fotos de la directiva), cuyo
+soporte en el código ya existe; la carga inicial de correos (A4) y la prueba de envío en
+producción (B10).
 
 ## 1. Decisiones tomadas
 
@@ -71,49 +76,50 @@ Carga de correos (admin y CLI, misma lógica en `server/correos-socios.ts`):
 
 ### 3.2 Tareas
 
-- [ ] **B1. Schema y migración** `socio_correo_precargado`: agrega `correoCifrado` y
+- [x] **B1. Schema y migración** `socio_correo_precargado`: agrega `correoCifrado` y
       `correoHash` a `Socio`, elimina `Cuenta.correoCifrado`. La migración **borra las filas de
       `Cuenta`** existentes (no hay cuentas reales; en desarrollo se pierden las de prueba).
-- [ ] **B2. Cifrado y rotación**: `hashCorreo()`; `rotacion-claves.ts` lee, reescribe y
+- [x] **B2. Cifrado y rotación**: `hashCorreo()`; `rotacion-claves.ts` lee, reescribe y
       verifica `Socio.correoCifrado`/`correoHash` y deja de tocar `Cuenta.correoCifrado`; su test.
-- [ ] **B3. Contracts**: `registroSchema`, `ingresoSocioSchema` y `recuperarSchema` pasan a
+- [x] **B3. Contracts**: `registroSchema`, `ingresoSocioSchema` y `recuperarSchema` pasan a
       `correo`; nuevo `correoSocioSchema` (RUT + correo) para el admin. Tests.
-- [ ] **B4. `cuentas.ts`**: registrar, recuperar y `verificarIngresoSocio` por correo;
+- [x] **B4. `cuentas.ts`**: registrar, recuperar y `verificarIngresoSocio` por correo;
       `auth.ts` (credenciales `correo` + `contrasena`) y claves de `rate-limit`. Tests de
       integración, incluido «responde igual si el correo no existe».
-- [ ] **B5. `correos-socios.ts`**: leer Excel, vista previa, aplicar, definir uno. Tests con
+- [x] **B5. `correos-socios.ts`**: leer Excel, vista previa, aplicar, definir uno. Tests con
       planilla ficticia (extender `crearPlanillaFicticia` o agregar `crearListaCorreosFicticia`).
-- [ ] **B6. Admin y CLI**: página `/admin/correos` (importar con vista previa), formulario de
-      corrección y filtro «sin correo» en `/admin/socios`; comandos `correos:importar` y
-      `socio:correo`. `exportar`/`eliminar` del socio incluyen el correo nuevo.
-- [ ] **B7. UI de socios**: `/socios` (ingreso), `/socios/registro`, `/socios/recuperar` con
+- [x] **B6. Admin y CLI**: página `/admin/correos` (importar con vista previa y formulario de
+      corrección), filtro «sin correo» en `/admin/socios`; comandos `correos:importar`,
+      `socio:correo` y `prueba:cargar` (base de prueba para revisión manual). `exportar`/`eliminar` del socio incluyen el correo nuevo.
+- [x] **B7. UI de socios**: `/socios` (ingreso), `/socios/registro`, `/socios/recuperar` con
       campo correo; textos de ayuda («usa el correo que AFUCH tiene registrado; si no te llega
       el mensaje, escríbenos»); `/socios/datos` muestra el correo.
-- [ ] **B8. E2E**: `semilla.ts` carga socios con correo; `socios.spec.ts` y `admin.spec.ts`
+- [x] **B8. E2E**: `semilla.ts` carga socios con correo; `socios.spec.ts` y `admin.spec.ts`
       con el flujo nuevo.
-- [ ] **B9. Documentación**: D4′ y D10–D13 en el plan de cierre, regla 6 de `CLAUDE.md`,
+- [x] **B9. Documentación**: D4′ y D10–D13 en el plan de cierre, regla 6 de `CLAUDE.md`,
       `README.md`.
 - [ ] **B10. Resend (producción)**: `RESEND_API_KEY` en el `.env` del VPS (no en el repo ni
-      en la conversación), verificar el dominio remitente y enviar un correo de prueba.
+      en la conversación) y enviar un correo de prueba. El dominio ya está verificado y el
+      remitente por defecto pasó a `contacto@afuchscen.cl`.
 
 ## 4. Parte C — Contenido del sitio
 
-- [ ] **C1. FENAFUCH (D13)**: constante en `content/` con el texto aprobado; se muestra en la
+- [x] **C1. FENAFUCH (D13)**: constante en `content/` con el texto aprobado; se muestra en la
       portada (bloque propio), en la página de convenios (encabezado) y en el pie. Sin enlace
       externo hasta resolver P8.
 - [ ] **C2. Teléfono y dirección** _(espera A1)_: cambiar `SEDE.telefono` y `SEDE.direccion`
       en `content/sede.ts`; revisar JSON-LD y mapa si corresponde.
-- [ ] **C3. Quitar horarios**: eliminar `SEDE.horarios` y sus usos en `site-footer.tsx`,
+- [x] **C3. Quitar horarios**: eliminar `SEDE.horarios` y sus usos en `site-footer.tsx`,
       `contacto/page.tsx` y el JSON-LD de `layout.tsx`; ajustar `publico.spec.ts`.
-- [ ] **C4. Conceptos ocultos (D12)**: `CONCEPTOS_OCULTOS` en `server/descuentos.ts`;
+- [x] **C4. Conceptos ocultos (D12)**: `CONCEPTOS_OCULTOS` en `server/descuentos.ts`;
       `periodosDelSocio` y `detallePeriodo` los excluyen del detalle y del total; nota en
       «Mis descuentos» de que el total puede no incluir todos los descuentos de la liquidación.
       La importación, el admin y la exportación de datos del socio **no cambian** (el dato se
       conserva completo). Tests.
-- [ ] **C5. Convenios por origen** _(espera A2)_: campo `origen: 'afuch-sc' | 'fenafuch'` en
+- [ ] **C5. Convenios por origen** _(espera A2; el campo opcional y la etiqueta ya están)_: campo `origen: 'afuch-sc' | 'fenafuch'` en
       `convenioSchema`; la página agrupa y etiqueta por origen. Se implementa cuando llegue el
       listado, para no clasificar a ciegas.
-- [ ] **C6. Fotos de la directiva** _(espera A3)_: `foto?: { src; alt }` en
+- [ ] **C6. Fotos de la directiva** _(espera A3; el campo `foto` y el respaldo con iniciales ya están)_: `foto?: { src; alt }` en
       `MiembroDirectiva`, tarjeta con imagen optimizada (`next/image`, WebP en
       `public/directiva/`) y respaldo con iniciales si falta la foto.
 

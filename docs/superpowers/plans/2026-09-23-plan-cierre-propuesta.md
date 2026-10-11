@@ -67,14 +67,14 @@ algo, la decisión queda registrada en la sección 3 con su motivo.
 | D1 | Arquitectura | **Solo Next.js** (full-stack). Se elimina NestJS del spec. |
 | D2 | Hosting | **VPS con Docker** (docker-compose). AFUCH contrata el VPS a su nombre (propuesta §6). |
 | D3 | Carga de datos | **Admin interno** (`/admin`, solo La Palanca) **+ CLI sencillo** que reutiliza la misma lógica. |
-| D4 | Registro | El socio se registra con **su RUT y escribe un correo** al registrarse. La verificación llega a ese correo. |
+| D4 | Registro | ~~El socio se registra con su RUT y escribe un correo.~~ **Reemplazada el 2026-10-11 por D4′**: se registra e ingresa solo con el correo que AFUCH precargó. Ver `2026-10-11-plan-ajustes-reunion-clientas.md`. |
 | D5 | Whitelist | Todo RUT presente en la hoja **`ASOCIACI`** de una planilla importada. `RENUNCIA` y `CONTRATOS NO VALIDOS` no se usan. |
 | D6 | Baja de socios | Un socio **sigue habilitado** aunque deje de aparecer en la planilla, **hasta que un admin lo desactive** (función de admin/CLI). |
 | D7 | Mis descuentos | **Solo visualización en pantalla**, detalle por concepto y mes + total. **Sin descarga.** Sin columnas internas `SESENTA`/`CUARENTA`. |
 | D8 | Mis datos | **Solo lectura.** El socio no edita nada: el área privada es visualización de datos, no un lugar de trámites. Esto reemplaza "Mis datos editables" de la propuesta 2.2. |
 | D9 | Datos de sede | Son reales; se corrige el correo (B6). |
 
-**Riesgo aceptado por D4.** Como el correo lo escribe el socio y no viene de AFUCH, alguien
+**Riesgo aceptado por D4 (histórico: D4′ lo elimina, el correo ya no lo escribe el socio).** Como el correo lo escribe el socio y no viene de AFUCH, alguien
 que conozca un RUT ajeno podría registrarse antes que su dueño y ver sus descuentos.
 Mitigaciones implementadas:
 

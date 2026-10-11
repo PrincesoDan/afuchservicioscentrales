@@ -3,7 +3,8 @@
 Sitio institucional + área privada de socios + administración interna para AFUCH Servicios
 Centrales. Desarrolla y opera Agencia La Palanca. Lee el `README.md` para la visión completa y
 `docs/superpowers/plans/2026-09-23-plan-cierre-propuesta.md` para las decisiones (D1–D9, P5–P6,
-T1–T7) antes de cambiar comportamiento.
+T1–T7) y `docs/superpowers/plans/2026-10-11-plan-ajustes-reunion-clientas.md` (D4′, D10–D13)
+antes de cambiar comportamiento.
 
 ## Reglas que no se rompen
 
@@ -18,13 +19,14 @@ T1–T7) antes de cambiar comportamiento.
 3. **No ejecutes `prisma migrate reset`** ni nada que borre bases sin consentimiento explícito.
    Los tests usan `afuch_test` / `afuch_e2e` y limpian con `TRUNCATE` en su propio código.
 4. **Nunca guardes datos personales en claro.** RUT, nombre y correo se guardan con `cifrar()`;
-   búsqueda por RUT con `hashRut()`. La auditoría (`auditar()`) nunca lleva datos personales en
+   búsqueda por RUT con `hashRut()` y por correo con `hashCorreo()`. La auditoría (`auditar()`) nunca lleva datos personales en
    `detalle`: solo ids, conteos y motivos.
 5. **Las respuestas públicas no revelan quién es socio** (registro, recuperación e ingreso
    responden igual; el ingreso usa `verificarSenuelo` para igualar tiempos).
 6. Decisiones de producto vigentes: el socio **no edita nada** (D8), **no hay descargas** de
-   descuentos (D7), **importar nunca deshabilita** socios (D6), el registro usa el correo que
-   escribe el socio (D4, con las mitigaciones del plan §3.1).
+   descuentos (D7), **importar nunca deshabilita** socios (D6), el socio se registra e ingresa
+   **solo con el correo que AFUCH precargó** (D4′; no se pide RUT en formularios públicos) y
+   «Mis descuentos» oculta Go Optic y Reintegro bono de invierno (D12).
 
 ## Comandos
 
@@ -54,7 +56,9 @@ Monorepo pnpm + Turborepo. **Solo Next.js** (no hay API separada).
   El cliente se genera en `src/generated/` (ignorado por git).
 - `apps/web/src/server/` — toda la lógica de servidor. Cada archivo importa `server-only`.
   - `planilla.ts` lee la hoja `ASOCIACI` (puro, sin base) → `importacion.ts` la guarda.
-  - `cuentas.ts` registro/verificación/ingreso/recuperación de socios.
+  - `cuentas.ts` registro/verificación/ingreso/recuperación de socios (por correo).
+  - `correos-socios.ts` carga de los correos precargados (lista RUT + Mail, corrección individual).
+  - `base-de-prueba.ts` socios ficticios con correos reales para revisión manual (`pnpm cli prueba:cargar`).
   - `administracion.ts` operaciones de admin (listar, habilitar, anular, ausentes, exportar, eliminar).
   - `administradores.ts` admins + TOTP. `auth.ts` NextAuth + `exigirSocio()`/`exigirAdmin()`.
   - `rotacion-claves.ts` recifra todo con claves nuevas (`pnpm cli claves:rotar`).
@@ -97,6 +101,11 @@ Monorepo pnpm + Turborepo. **Solo Next.js** (no hay API separada).
 
 ## Trampas conocidas
 
+- React reinicia los campos de un `<form action>` al terminar la acción. Los formularios de
+  admin en dos pasos (vista previa → confirmar) usan `enviarSinReiniciar` para no perder el archivo.
+- El ingreso de admin admite 5 intentos cada 15 minutos por IP: en `admin.spec.ts` no agregues
+  más tests que ingresen sin revisar ese límite.
+- Si `apps/web/.env` tiene `RESEND_API_KEY`, `pnpm dev` envía correos reales. Los e2e la anulan.
 - `next start` es producción y exige `RESEND_API_KEY`; por eso los e2e usan `next dev`.
 - Tras cambiar `next.config.ts` con `pnpm dev` corriendo, `tsc` puede fallar con TS6053 sobre
   `.next/types` mientras se regenera: espera y reintenta.

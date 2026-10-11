@@ -49,7 +49,7 @@ Queda prohibido usar los datos para cualquier otra finalidad, cederlos o comunic
 ## 5. Medidas de seguridad implementadas
 
 - Conexión cifrada (HTTPS con certificado automático).
-- RUT, nombre y correo cifrados en la base de datos con AES-256-GCM; búsqueda por RUT mediante índice ciego (HMAC). Claves fuera de la base y de los respaldos.
+- RUT, nombre y correo cifrados en la base de datos con AES-256-GCM; búsqueda por RUT y por correo mediante índices ciegos (HMAC). Claves fuera de la base y de los respaldos.
 - Contraseñas con hash Argon2id; nadie, ni el administrador, puede verlas.
 - Registro de accesos y de acciones administrativas (auditoría) consultable en `/admin/auditoria`.
 - Límite de intentos (rate limiting) y bloqueo temporal de cuentas tras intentos fallidos.

@@ -79,9 +79,20 @@ de filas a AFUCH para que corrija la planilla.
 `/admin/socios` → filtro «Ausentes del último mes» → «Deshabilitar ausentes», o por RUT
 (`pnpm cli socio:desactivar <rut>`).
 
-**Cuenta registrada por otra persona.** Si un socio reclama que su RUT «ya tiene cuenta»:
-verificar su identidad con AFUCH y usar «Anular cuenta» (`pnpm cli socio:anular-cuenta <rut>`).
-El socio vuelve a registrarse con su correo; las sesiones de la cuenta anulada dejan de valer.
+**Correos de socios.** El socio se registra e ingresa con el correo que AFUCH tiene
+registrado; sin correo cargado no puede crear su cuenta.
+
+- Lista completa (Excel validado por AFUCH con columnas `RUT` y `Mail`): `/admin/correos`, o
+  `dc run --rm herramientas pnpm cli correos:importar /entrada/correos.xlsx` (vista previa) y
+  luego con `--confirmar`. Borrar el archivo después (`shred -u`). Los RUT que no son socios
+  se omiten: importar primero la planilla del mes.
+- Un socio cambió de correo o no le llega el mensaje: verificar su identidad con AFUCH y
+  corregirlo en `/admin/correos` (`pnpm cli socio:correo <rut> <correo>`). Conserva su cuenta
+  y contraseña; se avisa al correo anterior.
+
+**Acceso indebido a una cuenta.** Verificar la identidad del socio con AFUCH, corregir el
+correo si corresponde y usar «Anular cuenta» (`pnpm cli socio:anular-cuenta <rut>`). El socio
+vuelve a registrarse; las sesiones de la cuenta anulada dejan de valer.
 
 **Rendición de cuentas.** `/admin/rendicion` o
 `dc run --rm herramientas pnpm cli rendicion:publicar /entrada/doc.pdf --titulo "…" --categoria "…" --fecha AAAA-MM-DD`.
@@ -146,7 +157,7 @@ sus descuentos. Registrar fecha y resultado.
 | `RESEND_API_KEY` | Crear nueva en Resend, cambiar en `.env`, `dc up -d`, revocar la anterior | — |
 | Contraseña/TOTP de un admin | `pnpm cli admin:crear <email>` (reinicia ambos) | — |
 | Baja de un admin | `pnpm cli admin:desactivar <email>` | Pierde acceso de inmediato. |
-| `CLAVE_CIFRADO` / `CLAVE_HMAC` | `pnpm cli claves:rotar` (sección 10.1) | Recifra RUT, nombres, correos y secretos TOTP; recalcula el índice del RUT. Sesiones, contraseñas y códigos TOTP siguen funcionando. |
+| `CLAVE_CIFRADO` / `CLAVE_HMAC` | `pnpm cli claves:rotar` (sección 10.1) | Recifra RUT, nombres, correos y secretos TOTP; recalcula los índices de RUT y de correo. Sesiones, contraseñas y códigos TOTP siguen funcionando. |
 
 ### 10.1 Rotar `CLAVE_CIFRADO` y/o `CLAVE_HMAC`
 

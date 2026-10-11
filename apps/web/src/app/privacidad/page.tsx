@@ -53,9 +53,9 @@ export default function PaginaPrivacidad() {
               <p>
                 En el área privada de socios tratamos los datos de la nómina que nos entrega{' '}
                 {SEDE.nombre} (RUT, nombre y unidad o facultad), el detalle mensual de tus
-                descuentos por planilla, el correo que ingresas al registrarte, tu contraseña
-                (guardada como hash irreversible, nunca en texto legible) y un registro de accesos
-                con fecha e IP.
+                descuentos por planilla, el correo que la asociación tiene registrado para ti, tu
+                contraseña (guardada como hash irreversible, nunca en texto legible) y un registro
+                de accesos con fecha e IP.
               </p>
               <p>
                 No usamos cookies de seguimiento ni herramientas de analítica de terceros. El área
