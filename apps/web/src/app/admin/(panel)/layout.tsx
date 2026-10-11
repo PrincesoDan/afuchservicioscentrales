@@ -9,6 +9,7 @@ export const metadata: Metadata = { title: 'Administración', robots: { index: f
 
 const PESTANAS = [
   { href: '/admin/planilla', texto: 'Planilla mensual' },
+  { href: '/admin/correos', texto: 'Correos de socios' },
   { href: '/admin/socios', texto: 'Socios' },
   { href: '/admin/rendicion', texto: 'Rendición de cuentas' },
   { href: '/admin/auditoria', texto: 'Auditoría' },

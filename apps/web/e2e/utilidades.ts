@@ -18,11 +18,11 @@ export function correosPara(para: string): Correo[] {
 }
 
 /** Espera el correo (el servidor lo escribe de forma asíncrona) y devuelve el enlace con token. */
-export async function enlaceDelCorreo(para: string): Promise<string> {
+export async function enlaceDelCorreo(para: string, ruta = ''): Promise<string> {
   for (let intento = 0; intento < 50; intento += 1) {
     const correo = correosPara(para).at(-1);
     const enlace = correo?.texto.match(/https?:\/\/\S+token=\S+/)?.[0];
-    if (enlace) return enlace;
+    if (enlace?.includes(ruta)) return enlace;
     await new Promise((r) => setTimeout(r, 200));
   }
   throw new Error(`No llegó correo con enlace para ${para}`);

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import {
   accionAnularCuenta,
   accionDeshabilitarAusentes,
@@ -7,10 +8,11 @@ import { BotonConfirmar } from '@/components/admin/boton-confirmar';
 import { CLASES_CAMPO } from '@/components/ui/campo';
 import { listarSocios, type EstadoCuenta } from '@/server/administracion';
 
-type Filtro = 'todos' | 'con_cuenta' | 'deshabilitados' | 'ausentes';
+type Filtro = 'todos' | 'con_cuenta' | 'sin_correo' | 'deshabilitados' | 'ausentes';
 const FILTROS: Record<Filtro, string> = {
   todos: 'Todos',
   con_cuenta: 'Con cuenta',
+  sin_correo: 'Sin correo cargado',
   deshabilitados: 'Deshabilitados',
   ausentes: 'Ausentes del último mes',
 };
@@ -30,14 +32,21 @@ export default async function PaginaSocios({ searchParams }: Props) {
   const socios = await listarSocios({ busqueda: q, filtro });
   const ausentes =
     filtro === 'ausentes' ? socios.length : (await listarSocios({ filtro: 'ausentes' })).length;
+  const sinCorreo =
+    filtro === 'sin_correo' ? socios.length : (await listarSocios({ filtro: 'sin_correo' })).length;
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-navy-900">Socios</h1>
       <p className="mt-2 max-w-3xl text-sm/6 text-slate-600">
         Un socio sigue habilitado aunque no aparezca en la última planilla, hasta que se deshabilite
-        aquí. «Anular cuenta» borra la cuenta de acceso (no los descuentos): úsalo si alguien
-        registró un RUT ajeno.
+        aquí. «Anular cuenta» borra la cuenta de acceso (no el correo ni los descuentos): el socio
+        debe registrarse de nuevo. Para que un socio pueda crear su cuenta necesita un correo
+        cargado en{' '}
+        <Link href="/admin/correos" className="font-semibold text-navy-600 hover:text-navy-800">
+          Correos de socios
+        </Link>
+        .
       </p>
 
       <form method="get" className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -89,6 +98,18 @@ export default async function PaginaSocios({ searchParams }: Props) {
         </form>
       ) : null}
 
+      {sinCorreo > 0 && filtro !== 'sin_correo' ? (
+        <p className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+          {sinCorreo} socios no tienen correo cargado y todavía no pueden crear su cuenta.{' '}
+          <Link
+            href="/admin/socios?filtro=sin_correo"
+            className="font-semibold text-navy-600 hover:text-navy-800"
+          >
+            Ver cuáles
+          </Link>
+        </p>
+      ) : null}
+
       <p className="mt-6 text-sm text-slate-600">
         {socios.length} resultados
         {socios.length > LIMITE ? ` (se muestran los primeros ${LIMITE})` : ''}.
@@ -131,9 +152,11 @@ export default async function PaginaSocios({ searchParams }: Props) {
                 </td>
                 <td className="px-4 py-3">
                   {CUENTA[s.cuenta]}
-                  {s.correo ? (
-                    <span className="block text-xs text-slate-500">{s.correo}</span>
-                  ) : null}
+                  <span
+                    className={`block text-xs ${s.correo ? 'text-slate-500' : 'text-gold-700'}`}
+                  >
+                    {s.correo ?? 'Sin correo cargado'}
+                  </span>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap justify-end gap-2">

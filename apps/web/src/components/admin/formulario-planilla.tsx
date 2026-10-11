@@ -6,6 +6,7 @@ import { formatearClp } from '@/lib/convenios';
 import { nombrePeriodo } from '@/lib/periodos';
 import { Aviso } from '../socios/tarjeta-acceso';
 import { Boton } from '../ui/button';
+import { enviarSinReiniciar } from './enviar-sin-reiniciar';
 
 const INICIAL: EstadoPlanilla = { etapa: 'inicial' };
 
@@ -18,7 +19,7 @@ export function FormularioPlanilla({
 
   return (
     // El botón que envía decide la etapa: solo «Importar» agrega confirmar=si al FormData.
-    <form action={accion} className="space-y-6">
+    <form onSubmit={enviarSinReiniciar(accion)} className="space-y-6">
       <div>
         <label htmlFor="archivo" className="mb-2 block text-sm font-semibold text-navy-900">
           Planilla (.xlsx)

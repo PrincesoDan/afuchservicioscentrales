@@ -5,6 +5,9 @@ export const RAIZ = path.resolve(__dirname, '..');
 export const BUZON = path.join(RAIZ, 'e2e/.buzon');
 export const ESTADO = path.join(RAIZ, 'e2e/.estado.json');
 
+/** Correo que el admin carga para la socia de prueba (admin.spec) y con el que ella se registra (socios.spec). */
+export const CORREO_SOCIA = 'socia.e2e@uchile.cl';
+
 /** Entorno aislado para e2e: base propia, claves fijas y correos a archivo. */
 export const ENTORNO_E2E: Record<string, string> = {
   DATABASE_URL: process.env.DATABASE_URL_E2E ?? 'postgresql://afuch:afuch@localhost:5433/afuch_e2e',
@@ -14,4 +17,6 @@ export const ENTORNO_E2E: Record<string, string> = {
   NEXTAUTH_URL: `http://localhost:${PUERTO}`,
   STORAGE_DIR: path.join(RAIZ, '.storage-e2e'),
   CORREO_BUZON_DIR: BUZON,
+  // Vacía a propósito: si el .env local trae la clave real, los e2e no deben enviar correos.
+  RESEND_API_KEY: '',
 };

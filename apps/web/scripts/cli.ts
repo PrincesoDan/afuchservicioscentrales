@@ -5,7 +5,7 @@
  *   pnpm cli ayuda
  */
 import 'dotenv/config';
-import { formatearRut, normalizarRut, esRutValido } from '@afuch/contracts';
+import { correoSchema, formatearRut, normalizarRut, esRutValido } from '@afuch/contracts';
 import { randomBytes } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { userInfo } from 'node:os';
@@ -21,6 +21,13 @@ import {
   exportarSocio,
 } from '../src/server/administracion';
 import { crearAdministrador, desactivarAdministrador } from '../src/server/administradores';
+import { cargarBaseDePrueba, leerPadronDePrueba } from '../src/server/base-de-prueba';
+import {
+  aplicarCorreos,
+  definirCorreoSocio,
+  leerListaCorreos,
+  previsualizarCorreos,
+} from '../src/server/correos-socios';
 import { crearPlanillaFicticia } from '../src/server/fixtures/planilla-ficticia';
 import { importarPlanilla } from '../src/server/importacion';
 import { leerPlanilla } from '../src/server/planilla';
@@ -32,11 +39,17 @@ Uso: pnpm cli <comando> [opciones]
 
   planilla:importar <archivo.xlsx> [--confirmar]   Sin --confirmar solo valida (vista previa).
   planilla:ficticia <salida.xlsx>                  Genera una planilla de prueba con datos inventados.
+  correos:importar <archivo.xlsx> [--confirmar]    Carga los correos de los socios (columnas RUT y Mail).
+                                                   Sin --confirmar solo valida (vista previa).
+  prueba:cargar <padron.xlsx> [--confirmar]        Solo desarrollo: crea socios de prueba (RUT 11.111.111-1,
+                                                   22.222.222-2…) con descuentos inventados y los correos del
+                                                   Excel (columnas Nombre, Apellido paterno, Apellido materno, Mail).
   rendicion:publicar <archivo.pdf> --titulo T --categoria C --fecha AAAA-MM-DD
   rendicion:listar
   socio:estado <rut>
   socio:desactivar <rut>
   socio:activar <rut>
+  socio:correo <rut> <correo>                      Asigna o corrige el correo con que el socio se registra e ingresa.
   socio:anular-cuenta <rut>                        Borra la cuenta de acceso (no los descuentos).
   socio:exportar <rut>                             Derecho de acceso: imprime en JSON todo lo guardado del socio.
   socio:eliminar <rut> --confirmar                 Derecho de supresión: borra socio, cuenta y descuentos.
@@ -71,7 +84,7 @@ async function main(): Promise<void> {
       fecha: { type: 'string' },
     },
   });
-  const [comando, argumento] = positionals;
+  const [comando, argumento, segundoArgumento] = positionals;
 
   switch (comando) {
     case 'planilla:importar': {
@@ -107,6 +120,46 @@ async function main(): Promise<void> {
       console.log(`Planilla ficticia escrita en ${argumento} (agosto 2026, 3 socios inventados).`);
       return;
     }
+    case 'correos:importar': {
+      if (!argumento) throw new Error('Indica el archivo .xlsx.');
+      const lectura = await leerListaCorreos(await readFile(argumento));
+      const vista = await previsualizarCorreos(lectura);
+      console.log(
+        `Filas: ${vista.filasLeidas} · Nuevos: ${vista.nuevos} · Cambian: ${vista.cambiados} · Sin cambios: ${vista.sinCambios} · RUT que no son socios: ${vista.rutDesconocidos} · Sin correo: ${vista.sinCorreo}`,
+      );
+      for (const error of vista.errores) console.log(`ERROR ${error}`);
+      if (vista.errores.length > 0) {
+        process.exitCode = 1;
+        return;
+      }
+      if (!values.confirmar) {
+        console.log('\nVista previa. Repite con --confirmar para cargar.');
+        return;
+      }
+      const resumen = await aplicarCorreos(lectura, actor);
+      console.log(`Cargados: ${resumen.nuevos} nuevos, ${resumen.cambiados} cambiados.`);
+      return;
+    }
+    case 'prueba:cargar': {
+      if (!argumento) throw new Error('Indica el archivo .xlsx.');
+      const lectura = await leerPadronDePrueba(await readFile(argumento));
+      console.log(`Personas leídas: ${lectura.personas.length}`);
+      for (const error of lectura.errores) console.log(`ERROR ${error}`);
+      if (lectura.errores.length > 0) {
+        process.exitCode = 1;
+        return;
+      }
+      if (!values.confirmar) {
+        console.log('\nVista previa. Repite con --confirmar para crear los socios de prueba.');
+        return;
+      }
+      const base = await cargarBaseDePrueba(lectura.personas, actor);
+      for (const s of base.socios) console.log(`  ${s.rut}  ${s.nombre}`);
+      console.log(
+        `Base de prueba lista: ${base.socios.length} socios con correo y ${base.periodos} meses de descuentos inventados.`,
+      );
+      return;
+    }
     case 'rendicion:publicar': {
       if (!argumento || !values.titulo || !values.categoria || !values.fecha)
         throw new Error('Faltan opciones. Ver: pnpm cli ayuda');
@@ -136,6 +189,27 @@ async function main(): Promise<void> {
       const s = await socioDe(argumento);
       await cambiarHabilitacion(s.id, comando === 'socio:activar', actor);
       console.log(`${s.nombre}: ${comando === 'socio:activar' ? 'habilitado' : 'deshabilitado'}.`);
+      return;
+    }
+    case 'socio:correo': {
+      const correo = correoSchema.safeParse(segundoArgumento);
+      if (!correo.success) throw new Error('Correo inválido.');
+      const resultado = await definirCorreoSocio(
+        { rut: rutDe(argumento), correo: correo.data },
+        actor,
+      );
+      if (!resultado.ok) {
+        throw new Error(
+          resultado.motivo === 'socio_no_existe'
+            ? 'No hay un socio con ese RUT.'
+            : 'Ese correo ya está asignado a otro socio.',
+        );
+      }
+      console.log(
+        { nuevo: 'Correo guardado.', cambiado: 'Correo actualizado.', sin_cambios: 'Sin cambios.' }[
+          resultado.cambio
+        ],
+      );
       return;
     }
     case 'socio:anular-cuenta': {

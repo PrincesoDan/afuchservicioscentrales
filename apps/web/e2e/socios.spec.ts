@@ -1,9 +1,8 @@
-import { calcularDigitoVerificador } from '@afuch/contracts';
 import { expect, test } from '@playwright/test';
+import { CORREO_SOCIA as CORREO } from './entorno';
 import { correosPara, enlaceDelCorreo } from './utilidades';
 
-const RUT = `11.111.111-${calcularDigitoVerificador('11111111')}`;
-const CORREO = 'socia.e2e@uchile.cl';
+// El admin cargó este correo para la socia de prueba en admin.spec.ts (se ejecuta antes).
 const CLAVE = 'clave-e2e-bien-larga';
 
 test.describe.configure({ mode: 'serial' });
@@ -15,10 +14,10 @@ test('sin sesión, el área privada lleva al ingreso', async ({ page }) => {
 
 test('registro, verificación, ingreso y consulta', async ({ page }) => {
   await page.goto('/socios/registro');
-  await page.getByLabel('RUT').fill(RUT);
+  await expect(page.getByLabel('RUT')).toHaveCount(0);
   await page.getByLabel('Correo electrónico').fill(CORREO);
   await page.getByRole('button', { name: 'Crear mi cuenta' }).click();
-  await expect(page.getByText(/Si tu RUT está en la nómina/)).toBeVisible();
+  await expect(page.getByText(/es el correo que AFUCH tiene registrado para ti/)).toBeVisible();
 
   await page.goto(await enlaceDelCorreo(CORREO));
   await page.getByLabel('Nueva contraseña').fill(CLAVE);
@@ -27,7 +26,7 @@ test('registro, verificación, ingreso y consulta', async ({ page }) => {
   await expect(page.getByText('Tu contraseña quedó guardada.')).toBeVisible();
 
   await page.getByRole('link', { name: 'Ingresar' }).click();
-  await page.getByLabel('RUT').fill(RUT);
+  await page.getByLabel('Correo electrónico').fill(CORREO);
   await page.getByLabel('Contraseña').fill(CLAVE);
   await page.getByRole('button', { name: 'Ingresar' }).click();
 
@@ -39,6 +38,7 @@ test('registro, verificación, ingreso y consulta', async ({ page }) => {
     tabla.getByText('Préstamo 1: cuota 1 de 3 · Préstamo 2: cuota 2 de 3'),
   ).toBeVisible();
   await expect(tabla.getByRole('row', { name: /Total del mes/ })).toContainText('$75.249');
+  await expect(tabla.getByText(/Go Optic|bono de invierno/i)).toHaveCount(0);
 
   // El admin publicó este documento en admin.spec.ts (se ejecuta antes).
   await page.getByRole('link', { name: 'Rendición de cuentas' }).click();
@@ -64,20 +64,32 @@ test('sin sesión, los documentos de rendición no se entregan', async ({ reques
   expect(respuesta.status()).toBe(401);
 });
 
-test('RUT fuera de la nómina recibe el mismo mensaje y ningún correo', async ({ page }) => {
-  const rutAjeno = `19.999.999-${calcularDigitoVerificador('19999999')}`;
+test('un correo que AFUCH no cargó recibe el mismo mensaje y ningún correo', async ({ page }) => {
   await page.goto('/socios/registro');
-  await page.getByLabel('RUT').fill(rutAjeno);
   await page.getByLabel('Correo electrónico').fill('ajeno@example.com');
   await page.getByRole('button', { name: 'Crear mi cuenta' }).click();
-  await expect(page.getByText(/Si tu RUT está en la nómina/)).toBeVisible();
+  await expect(page.getByText(/es el correo que AFUCH tiene registrado para ti/)).toBeVisible();
   expect(correosPara('ajeno@example.com')).toHaveLength(0);
+});
+
+test('recupera la contraseña con el correo', async ({ page }) => {
+  await page.goto('/socios/recuperar');
+  await page.getByLabel('Correo electrónico').fill(CORREO);
+  await page.getByRole('button', { name: 'Enviar enlace' }).click();
+  await expect(page.getByText(/Si ese correo tiene una cuenta activa/)).toBeVisible();
+
+  const enlace = await enlaceDelCorreo(CORREO, '/socios/restablecer');
+  await page.goto(enlace);
+  await page.getByLabel('Nueva contraseña').fill(CLAVE);
+  await page.getByLabel('Repite la contraseña').fill(CLAVE);
+  await page.getByRole('button', { name: 'Guardar contraseña' }).click();
+  await expect(page.getByText('Tu contraseña quedó guardada.')).toBeVisible();
 });
 
 test('contraseña incorrecta no ingresa', async ({ page }) => {
   await page.goto('/socios');
-  await page.getByLabel('RUT').fill(RUT);
+  await page.getByLabel('Correo electrónico').fill(CORREO);
   await page.getByLabel('Contraseña').fill('incorrecta-larga');
   await page.getByRole('button', { name: 'Ingresar' }).click();
-  await expect(page.getByText('RUT o contraseña incorrectos.', { exact: false })).toBeVisible();
+  await expect(page.getByText('Correo o contraseña incorrectos.', { exact: false })).toBeVisible();
 });
