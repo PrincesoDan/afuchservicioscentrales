@@ -5,12 +5,17 @@ import { z } from 'zod';
  * Catálogo inicial, transcrito desde `info/BENEFICIOS AFUCH.pdf` y las piezas
  * gráficas de convenios entregadas por AFUCH.
  *
+ * `origen: 'afuch-sc'` marca los convenios cuyos descuentos hace AFUCH Servicios
+ * Centrales según el detalle del 2026-10-11. El resto queda sin origen hasta que
+ * AFUCH confirme cuáles son de FENAFUCH.
+ *
  * Los montos provienen de documentos de septiembre de 2026 y deben confirmarse
  * con AFUCH antes de publicar en producción.
  */
 const convenios: Convenio[] = [
   {
     slug: 'fondo-solidario',
+    origen: 'afuch-sc',
     nombre: 'Fondo Solidario AFUCH',
     categoria: 'solidaridad',
     resumen:
@@ -44,6 +49,7 @@ const convenios: Convenio[] = [
   },
   {
     slug: 'vales-abastible',
+    origen: 'afuch-sc',
     nombre: 'Vales digitales Abastible',
     categoria: 'gas',
     resumen:
@@ -64,6 +70,7 @@ const convenios: Convenio[] = [
   },
   {
     slug: 'prestamo-solidario',
+    origen: 'afuch-sc',
     nombre: 'Préstamo Solidario',
     categoria: 'solidaridad',
     resumen:
@@ -84,6 +91,7 @@ const convenios: Convenio[] = [
   },
   {
     slug: 'seguro-oncologico-falp',
+    origen: 'afuch-sc',
     nombre: 'Seguro Oncológico FALP',
     categoria: 'salud',
     resumen:
@@ -108,6 +116,7 @@ const convenios: Convenio[] = [
   },
   {
     slug: 'prestamos-coopeuch',
+    origen: 'afuch-sc',
     nombre: 'Préstamos de consumo Coopeuch',
     categoria: 'ahorro-credito',
     resumen:

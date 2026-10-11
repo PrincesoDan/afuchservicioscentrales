@@ -3,7 +3,8 @@ import Image from 'next/image';
 import { BotonLink } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { EncabezadoSeccion } from '@/components/ui/encabezado-seccion';
-import { DIRECTIVA } from '@/content/directiva';
+import { ASOCIACION } from '@/content/asociacion';
+import { DIRECTIVA, PERIODO_DIRECTIVA } from '@/content/directiva';
 import { FENAFUCH, SEDE } from '@/content/sede';
 
 export const metadata: Metadata = {
@@ -30,9 +31,8 @@ const PRINCIPIOS = [
   },
 ] as const;
 
-/** Respaldo cuando falta la fotografía; «?» mientras el nombre siga pendiente. */
+/** Respaldo cuando falta la fotografía. */
 function iniciales(nombre: string): string {
-  if (nombre === 'Por confirmar') return '?';
   return nombre
     .split(/\s+/)
     .slice(0, 2)
@@ -58,21 +58,32 @@ export default function PaginaQuienesSomos() {
           <div className="grid gap-14 lg:grid-cols-[1.1fr_0.9fr]">
             <div>
               <h2 className="text-3xl font-bold tracking-tight text-balance text-navy-900">
-                Nuestra historia
+                La asociación
               </h2>
               <div className="mt-6 space-y-5 text-base/8 text-slate-700">
-                <p className="rounded-lg border border-dashed border-gold-500/50 bg-gold-100/40 p-5 text-sm/7 text-gold-700">
-                  <strong className="font-semibold">Contenido pendiente.</strong> AFUCH Servicios
-                  Centrales aún no entrega el texto de historia y misión institucional. Este bloque
-                  queda maquetado y listo para recibirlo.
-                </p>
                 <p>
-                  AFUCH Servicios Centrales agrupa a las funcionarias y funcionarios que sostienen
-                  el funcionamiento administrativo de la Universidad de Chile. Su tarea es
-                  representar sus intereses ante la institución, negociar beneficios colectivos y
-                  administrar un fondo solidario que responde en los momentos difíciles.
+                  La {ASOCIACION.nombreLegal}, se constituyó en Santiago el{' '}
+                  {ASOCIACION.constitucion}. Tiene personalidad jurídica vigente y está inscrita con
+                  el N° {ASOCIACION.registro.numero} en el {ASOCIACION.registro.nombre}.
                 </p>
+                <ul className="list-disc space-y-2 pl-5">
+                  {ASOCIACION.organizacion.map((punto) => (
+                    <li key={punto}>{punto}</li>
+                  ))}
+                </ul>
               </div>
+
+              <h2 className="mt-14 text-3xl font-bold tracking-tight text-balance text-navy-900">
+                Para qué existimos
+              </h2>
+              <p className="mt-6 text-base/8 text-slate-700">
+                Según sus estatutos, la asociación tiene por objeto:
+              </p>
+              <ul className="mt-4 list-disc space-y-2 pl-5 text-base/8 text-slate-700">
+                {ASOCIACION.objetivos.map((objetivo) => (
+                  <li key={objetivo}>{objetivo}</li>
+                ))}
+              </ul>
 
               <h2 className="mt-14 text-3xl font-bold tracking-tight text-balance text-navy-900">
                 Somos parte de la {FENAFUCH.nombre}
@@ -81,7 +92,10 @@ export default function PaginaQuienesSomos() {
                 <p>
                   {FENAFUCH.resumen} {FENAFUCH.detalle}
                 </p>
-                <p className="text-sm/6 text-slate-500">{FENAFUCH.nombreLargo}.</p>
+                <p className="text-sm/6 text-slate-500">
+                  {FENAFUCH.nombreLargo}. La asociación está afiliada a la federación desde el{' '}
+                  {ASOCIACION.afiliacionFenafuch}.
+                </p>
               </div>
 
               <h2 className="mt-14 text-3xl font-bold tracking-tight text-balance text-navy-900">
@@ -110,12 +124,9 @@ export default function PaginaQuienesSomos() {
                   rel="noopener noreferrer"
                   className="mt-6 w-full"
                 >
-                  Ver estatutos
+                  Ver estatutos (PDF)
                 </BotonLink>
-                <p className="mt-3 text-xs/5 text-slate-500">
-                  Se abre en Scribd, en una pestaña nueva. Cuando AFUCH entregue el PDF, pasará a
-                  ser descarga directa desde este sitio.
-                </p>
+                <p className="mt-3 text-xs/5 text-slate-500">Se abre en una pestaña nueva.</p>
               </div>
             </aside>
           </div>
@@ -127,18 +138,13 @@ export default function PaginaQuienesSomos() {
           <EncabezadoSeccion
             eyebrow="Directiva"
             titulo="Quiénes nos representan"
-            descripcion="La directiva vigente de AFUCH Servicios Centrales."
+            descripcion={`Directorio vigente entre el ${PERIODO_DIRECTIVA.inicio} y el ${PERIODO_DIRECTIVA.termino}.`}
           />
-
-          <p className="mb-8 rounded-lg border border-dashed border-gold-500/50 bg-gold-100/40 p-5 text-sm/7 text-gold-700">
-            <strong className="font-semibold">Contenido pendiente.</strong> Faltan los nombres,
-            cargos y fotografías de la directiva actual. La grilla queda lista para recibirlos.
-          </p>
 
           <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
             {DIRECTIVA.map(({ nombre, cargo, foto }) => (
               <li
-                key={cargo}
+                key={nombre}
                 className="rounded-xl border border-slate-200 bg-white p-6 text-center"
               >
                 {foto ? (

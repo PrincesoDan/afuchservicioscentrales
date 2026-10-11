@@ -11,7 +11,8 @@ export const SEDE = {
   region: 'Región Metropolitana',
   telefono: '+56 2 2978 0000',
   email: 'contacto@afuchscen.cl',
-  estatutosUrl: 'https://www.scribd.com/document/738076080/ESTATUTO-AFUCHSCEN',
+  /** PDF entregado por AFUCH el 2026-10-11; se sirve desde `public/documentos/`. */
+  estatutosUrl: '/documentos/estatutos-afuch-servicios-centrales.pdf',
 } as const;
 
 /**

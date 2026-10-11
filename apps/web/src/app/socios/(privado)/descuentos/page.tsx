@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { CUOTAS } from '@/content/asociacion';
 import { formatearClp } from '@/lib/convenios';
 import { nombrePeriodo } from '@/lib/periodos';
 import { exigirSocio } from '@/server/auth';
@@ -35,6 +36,11 @@ export default async function PaginaDescuentos({ searchParams }: Props) {
           Montos descontados por planilla según la información entregada por AFUCH Servicios
           Centrales. El total considera solo los conceptos de esta tabla y puede no coincidir con el
           total de descuentos de tu liquidación.
+        </p>
+        <p className="mt-2 text-sm text-slate-600">
+          La cuota social es el {CUOTAS.cuotaSocial.porcentaje}:{' '}
+          {CUOTAS.cuotaSocial.reparto.map((r) => `${r.parte} para ${r.destino}`).join(' y ')}.{' '}
+          {CUOTAS.notaFenafuch}
         </p>
 
         <div className="mt-6 overflow-hidden rounded-xl border border-slate-200">

@@ -18,6 +18,8 @@ next-env.d.ts
 info/*.xlsx
 info/*.xls
 info/*.csv
+# El certificado de vigencia trae los RUT del directorio
+info/certificado*.pdf
 packages/db/src/generated/
 storage/
 .storage-test/
@@ -27,6 +29,7 @@ storage/
 infra/.env
 infra/entrada/
 .buzon/
+temp/
 
 # Salida generada por graphify (puede indexar info/, incluida la planilla)
 graphify-out/

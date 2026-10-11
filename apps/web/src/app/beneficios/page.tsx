@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { CatalogoConvenios } from '@/components/catalogo-convenios';
 import { Container } from '@/components/ui/container';
+import { CUOTAS } from '@/content/asociacion';
 import { CONVENIOS } from '@/content/convenios';
 import { FENAFUCH } from '@/content/sede';
 
@@ -31,6 +32,34 @@ export default function PaginaBeneficios() {
           <div className="mb-12 rounded-xl border border-slate-200 bg-navy-50 p-6 sm:p-7">
             <h2 className="text-lg font-bold text-navy-900">{FENAFUCH.resumen}</h2>
             <p className="mt-2 max-w-3xl text-base/7 text-slate-700">{FENAFUCH.detalle}</p>
+          </div>
+
+          <div className="mb-12 grid gap-8 rounded-xl border border-slate-200 p-6 sm:p-7 lg:grid-cols-2">
+            <div>
+              <h2 className="text-lg font-bold text-navy-900">Cuota social</h2>
+              <p className="mt-2 text-base/7 text-slate-700">
+                La cuota social es el {CUOTAS.cuotaSocial.porcentaje} y se reparte así:
+              </p>
+              <dl className="mt-4 divide-y divide-slate-200 text-sm">
+                {CUOTAS.cuotaSocial.reparto.map(({ destino, parte }) => (
+                  <div key={destino} className="flex justify-between gap-6 py-2.5">
+                    <dt className="text-slate-700">{destino}</dt>
+                    <dd className="font-bold text-navy-900 tabular-nums">{parte}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-navy-900">
+                Descuentos adicionales de AFUCH Servicios Centrales
+              </h2>
+              <ul className="mt-3 list-disc space-y-1.5 pl-5 text-base/7 text-slate-700">
+                {CUOTAS.descuentosAdicionales.map((descuento) => (
+                  <li key={descuento}>{descuento}</li>
+                ))}
+              </ul>
+              <p className="mt-4 text-sm/6 text-slate-600">{CUOTAS.notaFenafuch}</p>
+            </div>
           </div>
           <CatalogoConvenios convenios={CONVENIOS} />
         </Container>

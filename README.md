@@ -150,7 +150,10 @@ Con la opción A cargada y `pnpm dev` corriendo en <http://localhost:3000>:
 - [ ] `/beneficios` y `/quienes-somos`: aparece el mismo texto; el pie de página lo resume.
 - [ ] `/contacto` y el pie: **no** hay horarios de atención. Teléfono y dirección siguen con
       los valores anteriores (pendiente de AFUCH).
-- [ ] `/quienes-somos`: la directiva sigue como «Por confirmar» (faltan nombres y fotos).
+- [ ] `/quienes-somos`: descripción y objetivos tomados de los estatutos, directorio 2026–2028
+      con iniciales (faltan las fotos) y «Ver estatutos (PDF)» abre el PDF del propio sitio.
+- [ ] `/beneficios`: bloque de cuota social (60% AFUCH SC / 40% FENAFUCH) y descuentos
+      adicionales; los convenios de AFUCH SC llevan su etiqueta.
 
 **Registro e ingreso con correo**
 
@@ -387,8 +390,9 @@ Respaldos: `infra/respaldo/respaldar.sh` (cron diario) y `restaurar.sh`.
 - Canal para entregar la planilla cada mes (P7), sin usar WhatsApp.
 - Plazos de retención de historial y respaldos (P8; hoy respaldos 30 días por defecto).
 - Documentos de rendición iniciales y sus categorías (P9).
-- Contenido del sitio (P12): historia y misión, directiva con fotos y cargos, estatutos en PDF,
-  más noticias, vigencias de convenios, texto de Dimeiggs.
+- Contenido del sitio (P12): relato de historia de la asociación (hoy la descripción sale de
+  los estatutos), fotografías de la directiva y confirmación de tildes en sus nombres (el
+  certificado no las trae), más noticias, vigencias de convenios, texto de Dimeiggs.
 - Corregir las **10 filas con dígito verificador inválido** de la planilla de agosto 2026.
 - Confirmar los nombres de conceptos y la lectura de cuotas del préstamo AFUCH (plan §3.2).
 
