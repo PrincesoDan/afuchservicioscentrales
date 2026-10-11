@@ -20,7 +20,7 @@ export default async function PaginaIngresoSocios({ searchParams }: Props) {
 
   return (
     <TarjetaAcceso
-      titulo="Ingresa con tu RUT"
+      titulo="Ingresa con tu correo"
       descripcion="Revisa tus descuentos por planilla y la rendición de cuentas de la asociación."
       pie={
         <div className="space-y-2">

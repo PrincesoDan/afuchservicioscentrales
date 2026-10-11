@@ -4,7 +4,7 @@ import { RateLimiterPrisma, RateLimiterRes } from 'rate-limiter-flexible';
 
 type Limitador = { puntos: number; segundos: number };
 
-/** Límites por clave (IP, o IP + RUT). Guardados en Postgres: sobreviven reinicios. */
+/** Límites por clave (IP, o IP + índice ciego del correo). Guardados en Postgres: sobreviven reinicios. */
 export const LIMITES = {
   contacto: { puntos: 5, segundos: 60 * 60 },
   registro: { puntos: 5, segundos: 60 * 60 },

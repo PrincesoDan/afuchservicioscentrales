@@ -1,6 +1,14 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { cifrar, descifrar, enmascararCorreo, generarToken, hashRut, hashToken } from './cifrado';
+import {
+  cifrar,
+  descifrar,
+  enmascararCorreo,
+  generarToken,
+  hashCorreo,
+  hashRut,
+  hashToken,
+} from './cifrado';
 
 describe('cifrado', () => {
   it('descifra lo que cifra', () => {
@@ -20,6 +28,12 @@ describe('cifrado', () => {
   it('el hash de RUT es estable y no contiene el RUT', () => {
     expect(hashRut('111111111')).toBe(hashRut('111111111'));
     expect(hashRut('111111111')).not.toContain('11111111');
+  });
+
+  it('el hash de correo es estable, no contiene el correo y no choca con el de RUT', () => {
+    expect(hashCorreo('socia@uchile.cl')).toBe(hashCorreo('socia@uchile.cl'));
+    expect(hashCorreo('socia@uchile.cl')).not.toContain('socia');
+    expect(hashCorreo('111111111')).not.toBe(hashRut('111111111'));
   });
 
   it('el hash del token coincide con el generado', () => {

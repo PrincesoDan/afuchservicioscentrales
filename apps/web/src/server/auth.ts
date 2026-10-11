@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { redirect } from 'next/navigation';
 import { adminActivo, verificarIngresoAdmin } from './administradores';
+import { hashCorreo } from './cifrado';
 import { socioPuedeVer, verificarIngresoSocio, type SesionSocio } from './cuentas';
 import { ipDesdeCabeceras } from './peticion';
 import { permitir } from './rate-limit';
@@ -26,12 +27,14 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       id: 'socio',
       name: 'Socio',
-      credentials: { rut: { type: 'text' }, contrasena: { type: 'password' } },
+      credentials: { correo: { type: 'email' }, contrasena: { type: 'password' } },
       async authorize(credenciales, req) {
         const datos = ingresoSocioSchema.safeParse(credenciales);
         if (!datos.success) return null;
         const ip = ipDeSolicitud(req);
-        if (!(await permitir('ingresoSocio', `${ip}:${datos.data.rut}`))) return null;
+        // El índice ciego evita dejar el correo en claro en la tabla del limitador.
+        if (!(await permitir('ingresoSocio', `${ip}:${hashCorreo(datos.data.correo)}`)))
+          return null;
         const sesion = await verificarIngresoSocio(datos.data, ip);
         return sesion ? { id: sesion.socioId, rol: 'socio', cuentaId: sesion.cuentaId } : null;
       },

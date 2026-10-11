@@ -5,7 +5,8 @@ import { limpiarBase } from '@/test/base';
 import { ENTORNO_TEST } from '@/test/entorno';
 import { buzon, tokenDelUltimoCorreo } from '@/test/correos';
 import { crearAdministrador } from './administradores';
-import { descifrarCon, hashRutCon } from './cifrado';
+import { descifrarCon, hashCorreoCon, hashRutCon } from './cifrado';
+import { definirCorreoSocio } from './correos-socios';
 import { definirContrasena, registrar } from './cuentas';
 import { crearPlanillaFicticia, rutFicticio } from './fixtures/planilla-ficticia';
 import { importarPlanilla } from './importacion';
@@ -42,7 +43,11 @@ describe('rotación de claves', () => {
       tipo: 'SISTEMA',
       id: 'test',
     });
-    await registrar({ rut: rutFicticio('11111111'), correo: CORREO }, IP);
+    await definirCorreoSocio(
+      { rut: rutFicticio('11111111'), correo: CORREO },
+      { tipo: 'SISTEMA', id: 'test' },
+    );
+    await registrar({ correo: CORREO }, IP);
     await definirContrasena(
       { token: tokenDelUltimoCorreo(CORREO), contrasena: 'una-clave-bien-larga' },
       'VERIFICACION',
@@ -61,7 +66,7 @@ describe('rotación de claves', () => {
 
     expect(resultado).toEqual({
       socios: 3,
-      cuentas: 1,
+      correos: 1,
       administradores: 1,
       rotaCifrado: true,
       rotaHmac: true,
@@ -75,7 +80,9 @@ describe('rotación de claves', () => {
     });
     expect(descifrarCon(claves.cifradoNueva, socio.rutCifrado)).toBe(rut);
     expect(descifrarCon(claves.cifradoNueva, socio.nombreCifrado)).toBe('PRUEBA UNO SOCIA');
-    expect(descifrarCon(claves.cifradoNueva, socio.cuenta!.correoCifrado)).toBe(CORREO);
+    expect(descifrarCon(claves.cifradoNueva, socio.correoCifrado!)).toBe(CORREO);
+    expect(socio.correoHash).toBe(hashCorreoCon(claves.hmacNueva, CORREO));
+    expect(socio.cuenta?.verificadaEn).not.toBeNull();
     expect(() => descifrarCon(claves.cifradoActual, socio.rutCifrado)).toThrow();
 
     const admin = await db().administrador.findFirstOrThrow();
@@ -92,6 +99,8 @@ describe('rotación de claves', () => {
     const despues = await db().socio.findMany({ orderBy: { id: 'asc' } });
     despues.forEach((s, i) => {
       expect(s.rutHash).not.toBe(antes[i]!.rutHash);
+      if (antes[i]!.correoHash) expect(s.correoHash).not.toBe(antes[i]!.correoHash);
+      else expect(s.correoHash).toBeNull();
       expect(descifrarCon(claves.cifradoActual, s.rutCifrado)).toBe(
         descifrarCon(claves.cifradoActual, antes[i]!.rutCifrado),
       );
@@ -128,7 +137,7 @@ describe('rotación de claves', () => {
       hmacNueva: HMAC_NUEVA,
     });
     await expect(rotarClaves(claves, { aplicar: true, actorId: 'test' })).rejects.toThrow(
-      /índice de RUT/,
+      /índices de RUT o de correo/,
     );
   });
 });

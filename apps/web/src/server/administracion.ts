@@ -15,6 +15,7 @@ export type FichaSocio = {
   habilitado: boolean;
   enUltimoPeriodo: boolean;
   cuenta: EstadoCuenta;
+  /** Enmascarado. `null` si AFUCH aún no carga el correo: el socio no puede registrarse. */
   correo: string | null;
   cuentaCreadaEn: Date | null;
 };
@@ -37,7 +38,7 @@ export async function listarSocios({
   filtro = 'todos',
 }: {
   busqueda?: string;
-  filtro?: 'todos' | 'con_cuenta' | 'deshabilitados' | 'ausentes';
+  filtro?: 'todos' | 'con_cuenta' | 'sin_correo' | 'deshabilitados' | 'ausentes';
 } = {}): Promise<FichaSocio[]> {
   const ultimo = await ultimoPeriodoId();
   const socios = await db().socio.findMany({ include: { cuenta: true } });
@@ -50,7 +51,7 @@ export async function listarSocios({
     habilitado: s.habilitado,
     enUltimoPeriodo: s.ultimoPeriodoId === ultimo,
     cuenta: !s.cuenta ? 'sin_cuenta' : s.cuenta.verificadaEn ? 'activa' : 'pendiente',
-    correo: s.cuenta ? enmascararCorreo(descifrar(s.cuenta.correoCifrado)) : null,
+    correo: s.correoCifrado ? enmascararCorreo(descifrar(s.correoCifrado)) : null,
     cuentaCreadaEn: s.cuenta?.creadaEn ?? null,
   }));
 
@@ -61,6 +62,7 @@ export async function listarSocios({
   return fichas
     .filter((f) => {
       if (filtro === 'con_cuenta' && f.cuenta === 'sin_cuenta') return false;
+      if (filtro === 'sin_correo' && f.correo !== null) return false;
       if (filtro === 'deshabilitados' && f.habilitado) return false;
       if (filtro === 'ausentes' && (f.enUltimoPeriodo || !f.habilitado)) return false;
       if (!termino) return true;
@@ -96,8 +98,8 @@ export async function cambiarHabilitacion(
 }
 
 /**
- * Borra la cuenta (no el socio ni sus descuentos). Es la salida cuando alguien
- * registró un RUT ajeno: el dueño real puede volver a registrarse.
+ * Borra la cuenta (no el socio, su correo ni sus descuentos). Es la salida
+ * cuando alguien más tuvo acceso al correo: el socio vuelve a registrarse.
  */
 export async function anularCuenta(socioId: string, actor: Actor): Promise<boolean> {
   const { count } = await db().cuenta.deleteMany({ where: { socioId } });
@@ -185,9 +187,9 @@ export async function exportarSocio(socioId: string, actor: Actor) {
     nombre: descifrar(socio.nombreCifrado),
     facultad: socio.facultad,
     habilitado: socio.habilitado,
+    correo: socio.correoCifrado ? descifrar(socio.correoCifrado) : null,
     cuenta: socio.cuenta
       ? {
-          correo: descifrar(socio.cuenta.correoCifrado),
           creadaEn: socio.cuenta.creadaEn,
           verificadaEn: socio.cuenta.verificadaEn,
         }

@@ -16,21 +16,33 @@ export const contrasenaSchema = z
   .min(LARGO_MINIMO_CONTRASENA, `Usa al menos ${LARGO_MINIMO_CONTRASENA} caracteres`)
   .max(128, 'Máximo 128 caracteres');
 
-export const registroSchema = z.object({
-  rut: rutSchema,
-  correo: z.string().trim().toLowerCase().email('Ingresa un correo válido').max(254),
-});
+/** Correo en cualquier formato de entrada; sale normalizado (sin espacios, en minúsculas). */
+export const correoSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(1, 'Ingresa tu correo')
+  .email('Ingresa un correo válido')
+  .max(254);
+
+/** Decisión D4′: el socio se identifica solo con el correo que AFUCH tiene registrado. */
+export const registroSchema = z.object({ correo: correoSchema });
 
 export type RegistroInput = z.infer<typeof registroSchema>;
 
 export const ingresoSocioSchema = z.object({
-  rut: rutSchema,
+  correo: correoSchema,
   contrasena: z.string().min(1, 'Ingresa tu contraseña').max(128),
 });
 
 export type IngresoSocioInput = z.infer<typeof ingresoSocioSchema>;
 
-export const recuperarSchema = z.object({ rut: rutSchema });
+export const recuperarSchema = z.object({ correo: correoSchema });
+
+/** Administración: asignar o corregir el correo de un socio identificado por su RUT. */
+export const correoSocioSchema = z.object({ rut: rutSchema, correo: correoSchema });
+
+export type CorreoSocioInput = z.infer<typeof correoSocioSchema>;
 
 export const definirContrasenaSchema = z
   .object({

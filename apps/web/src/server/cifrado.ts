@@ -26,6 +26,14 @@ export function hashRut(rutNormalizado: string): string {
   return hashRutCon(claveHmac(), rutNormalizado);
 }
 
+/**
+ * Índice ciego del correo (ya normalizado: sin espacios y en minúsculas). Es la
+ * llave con la que el socio se registra e ingresa (decisión D4′).
+ */
+export function hashCorreo(correoNormalizado: string): string {
+  return hashCorreoCon(claveHmac(), correoNormalizado);
+}
+
 /*
  * Variantes con clave explícita. Las usa la rotación de claves, que necesita
  * leer con la clave actual y escribir con la nueva en la misma pasada.
@@ -56,6 +64,13 @@ export function descifrarCon(claveAes: Buffer, valor: string): string {
 
 export function hashRutCon(claveHmacExplicita: Buffer, rutNormalizado: string): string {
   return createHmac('sha256', claveHmacExplicita).update(rutNormalizado).digest('hex');
+}
+
+/** El prefijo separa este índice del de RUT aunque compartan CLAVE_HMAC. */
+export function hashCorreoCon(claveHmacExplicita: Buffer, correoNormalizado: string): string {
+  return createHmac('sha256', claveHmacExplicita)
+    .update(`correo:${correoNormalizado}`)
+    .digest('hex');
 }
 
 /** Token de un solo uso para enlaces de correo. Se envía `token`; se guarda `hash`. */

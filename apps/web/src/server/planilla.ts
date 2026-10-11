@@ -67,12 +67,12 @@ export type ResultadoPlanilla = {
 
 type Primitivo = string | number | boolean | Date | null;
 
-function normalizarEncabezado(texto: string): string {
+export function normalizarEncabezado(texto: string): string {
   return texto.trim().replace(/\s+/g, ' ').toUpperCase();
 }
 
 /** Aplana los tipos de celda de exceljs (fórmulas, texto enriquecido, hipervínculos). */
-function valor(celda: ExcelJS.CellValue): Primitivo {
+export function valor(celda: ExcelJS.CellValue): Primitivo {
   if (celda === null || celda === undefined) return null;
   if (typeof celda !== 'object' || celda instanceof Date) return celda;
   if ('result' in celda) return valor(celda.result as ExcelJS.CellValue);
@@ -82,7 +82,7 @@ function valor(celda: ExcelJS.CellValue): Primitivo {
   return null;
 }
 
-function texto(v: Primitivo): string {
+export function texto(v: Primitivo): string {
   if (v === null) return '';
   if (v instanceof Date) return v.toISOString();
   return String(v).trim().replace(/\s+/g, ' ');

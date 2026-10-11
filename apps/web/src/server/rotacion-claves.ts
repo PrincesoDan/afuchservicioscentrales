@@ -1,7 +1,7 @@
 import 'server-only';
 import { db } from '@afuch/db';
 import { auditar } from './auditoria';
-import { cifrarCon, descifrarCon, hashRutCon } from './cifrado';
+import { cifrarCon, descifrarCon, hashCorreoCon, hashRutCon } from './cifrado';
 
 /**
  * Rotación de CLAVE_CIFRADO y/o CLAVE_HMAC. Procedimiento completo en
@@ -18,7 +18,8 @@ export type ClavesRotacion = {
 
 export type ResultadoRotacion = {
   socios: number;
-  cuentas: number;
+  /** Socios con correo precargado (cifrado + índice ciego). */
+  correos: number;
   administradores: number;
   rotaCifrado: boolean;
   rotaHmac: boolean;
@@ -65,9 +66,17 @@ export function prepararClaves(valores: {
   return { cifradoActual, cifradoNueva, hmacActual, hmacNueva };
 }
 
+const CAMPOS_SOCIO = {
+  id: true,
+  rutHash: true,
+  rutCifrado: true,
+  nombreCifrado: true,
+  correoCifrado: true,
+  correoHash: true,
+} as const;
+
 type Plano = {
-  socios: { id: string; rut: string; nombre: string }[];
-  cuentas: { id: string; correo: string }[];
+  socios: { id: string; rut: string; nombre: string; correo: string | null }[];
   administradores: { id: string; totp: string }[];
 };
 
@@ -77,11 +86,8 @@ type Plano = {
  * "actuales" no son las que cifraron la base.
  */
 async function leerTodo(claves: ClavesRotacion): Promise<Plano> {
-  const [socios, cuentas, administradores] = await Promise.all([
-    db().socio.findMany({
-      select: { id: true, rutHash: true, rutCifrado: true, nombreCifrado: true },
-    }),
-    db().cuenta.findMany({ select: { id: true, correoCifrado: true } }),
+  const [socios, administradores] = await Promise.all([
+    db().socio.findMany({ select: CAMPOS_SOCIO }),
     db().administrador.findMany({ select: { id: true, totpSecretCifrado: true } }),
   ]);
 
@@ -96,17 +102,17 @@ async function leerTodo(claves: ClavesRotacion): Promise<Plano> {
     }
   };
 
-  const plano: Plano = { socios: [], cuentas: [], administradores: [] };
+  const plano: Plano = { socios: [], administradores: [] };
   for (const s of socios) {
     const rut = intentar(() => descifrarCon(claves.cifradoActual, s.rutCifrado));
     const nombre = intentar(() => descifrarCon(claves.cifradoActual, s.nombreCifrado));
-    if (rut === null || nombre === null) continue;
+    const cifrado = s.correoCifrado;
+    const correo = cifrado ? intentar(() => descifrarCon(claves.cifradoActual, cifrado)) : null;
+    if (rut === null || nombre === null || (cifrado && correo === null)) continue;
     if (hashRutCon(claves.hmacActual, rut) !== s.rutHash) indicesInconsistentes += 1;
-    plano.socios.push({ id: s.id, rut, nombre });
-  }
-  for (const c of cuentas) {
-    const correo = intentar(() => descifrarCon(claves.cifradoActual, c.correoCifrado));
-    if (correo !== null) plano.cuentas.push({ id: c.id, correo });
+    const hashEsperado = correo === null ? null : hashCorreoCon(claves.hmacActual, correo);
+    if (hashEsperado !== s.correoHash) indicesInconsistentes += 1;
+    plano.socios.push({ id: s.id, rut, nombre, correo });
   }
   for (const a of administradores) {
     const totp = intentar(() => descifrarCon(claves.cifradoActual, a.totpSecretCifrado));
@@ -120,7 +126,7 @@ async function leerTodo(claves: ClavesRotacion): Promise<Plano> {
   }
   if (indicesInconsistentes > 0) {
     throw new Error(
-      `${indicesInconsistentes} socios tienen un índice de RUT que no corresponde a CLAVE_HMAC actual. No se modificó nada.`,
+      `${indicesInconsistentes} índices de RUT o de correo no corresponden a CLAVE_HMAC actual. No se modificó nada.`,
     );
   }
   return plano;
@@ -133,7 +139,7 @@ export async function rotarClaves(
   const plano = await leerTodo(claves);
   const resultado: ResultadoRotacion = {
     socios: plano.socios.length,
-    cuentas: plano.cuentas.length,
+    correos: plano.socios.filter((s) => s.correo !== null).length,
     administradores: plano.administradores.length,
     rotaCifrado: !claves.cifradoNueva.equals(claves.cifradoActual),
     rotaHmac: !claves.hmacNueva.equals(claves.hmacActual),
@@ -150,13 +156,13 @@ export async function rotarClaves(
             rutHash: hashRutCon(claves.hmacNueva, s.rut),
             rutCifrado: cifrarCon(claves.cifradoNueva, s.rut),
             nombreCifrado: cifrarCon(claves.cifradoNueva, s.nombre),
+            ...(s.correo === null
+              ? {}
+              : {
+                  correoCifrado: cifrarCon(claves.cifradoNueva, s.correo),
+                  correoHash: hashCorreoCon(claves.hmacNueva, s.correo),
+                }),
           },
-        });
-      }
-      for (const c of plano.cuentas) {
-        await tx.cuenta.update({
-          where: { id: c.id },
-          data: { correoCifrado: cifrarCon(claves.cifradoNueva, c.correo) },
         });
       }
       for (const a of plano.administradores) {
@@ -168,15 +174,11 @@ export async function rotarClaves(
 
       // Comprobación antes de confirmar: todo debe leerse con las claves nuevas
       // y dar exactamente lo mismo. Si no, la transacción se revierte entera.
-      const [socios, cuentas, administradores] = await Promise.all([
-        tx.socio.findMany({
-          select: { id: true, rutHash: true, rutCifrado: true, nombreCifrado: true },
-        }),
-        tx.cuenta.findMany({ select: { id: true, correoCifrado: true } }),
+      const [socios, administradores] = await Promise.all([
+        tx.socio.findMany({ select: CAMPOS_SOCIO }),
         tx.administrador.findMany({ select: { id: true, totpSecretCifrado: true } }),
       ]);
       const esperadoSocio = new Map(plano.socios.map((s) => [s.id, s]));
-      const esperadoCuenta = new Map(plano.cuentas.map((c) => [c.id, c.correo]));
       const esperadoAdmin = new Map(plano.administradores.map((a) => [a.id, a.totp]));
       const coincide =
         socios.every((s) => {
@@ -185,12 +187,14 @@ export async function rotarClaves(
             e &&
             descifrarCon(claves.cifradoNueva, s.rutCifrado) === e.rut &&
             descifrarCon(claves.cifradoNueva, s.nombreCifrado) === e.nombre &&
-            s.rutHash === hashRutCon(claves.hmacNueva, e.rut)
+            s.rutHash === hashRutCon(claves.hmacNueva, e.rut) &&
+            (e.correo === null
+              ? s.correoCifrado === null && s.correoHash === null
+              : s.correoCifrado !== null &&
+                descifrarCon(claves.cifradoNueva, s.correoCifrado) === e.correo &&
+                s.correoHash === hashCorreoCon(claves.hmacNueva, e.correo))
           );
         }) &&
-        cuentas.every(
-          (c) => descifrarCon(claves.cifradoNueva, c.correoCifrado) === esperadoCuenta.get(c.id),
-        ) &&
         administradores.every(
           (a) => descifrarCon(claves.cifradoNueva, a.totpSecretCifrado) === esperadoAdmin.get(a.id),
         );
@@ -206,7 +210,7 @@ export async function rotarClaves(
     accion: 'claves.rotadas',
     detalle: {
       socios: resultado.socios,
-      cuentas: resultado.cuentas,
+      correos: resultado.correos,
       administradores: resultado.administradores,
       rotaCifrado: resultado.rotaCifrado,
       rotaHmac: resultado.rotaHmac,

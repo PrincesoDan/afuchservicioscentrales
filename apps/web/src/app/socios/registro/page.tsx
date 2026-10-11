@@ -12,8 +12,9 @@ export default function PaginaRegistro() {
       titulo="Crea tu cuenta"
       descripcion={
         <p>
-          Solo pueden registrarse socias y socios que estén en la nómina de AFUCH Servicios
-          Centrales. Te enviaremos un correo para confirmar la cuenta y definir tu contraseña.
+          Solo pueden registrarse socias y socios de AFUCH Servicios Centrales, con el correo que la
+          asociación tiene registrado. Te enviaremos un mensaje para confirmar la cuenta y definir
+          tu contraseña.
         </p>
       }
       pie={
@@ -25,7 +26,7 @@ export default function PaginaRegistro() {
             </Link>
           </p>
           <p className="text-xs/5 text-slate-500">
-            Si tu RUT ya tiene una cuenta que no creaste tú, escríbenos a{' '}
+            Si no te llega el mensaje o cambiaste de correo, escríbenos a{' '}
             <a href={`mailto:${SEDE.email}`} className="font-semibold text-navy-600">
               {SEDE.email}
             </a>

@@ -15,13 +15,12 @@ export function FormularioRecuperar() {
 
   return (
     <form action={accion} noValidate className="space-y-6">
-      <Campo id="rut" etiqueta="RUT" error={estado.errores?.rut} requerido>
+      <Campo id="correo" etiqueta="Correo electrónico" error={estado.errores?.correo} requerido>
         <input
-          id="rut"
-          name="rut"
-          type="text"
+          id="correo"
+          name="correo"
+          type="email"
           autoComplete="username"
-          placeholder="12.345.678-5"
           className={CLASES_CAMPO}
         />
       </Campo>

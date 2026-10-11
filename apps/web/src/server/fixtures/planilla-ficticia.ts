@@ -160,3 +160,24 @@ export async function crearPlanillaFicticia({
 
   return Buffer.from(await libro.xlsx.writeBuffer());
 }
+
+export type FilaCorreoFicticia = { nombre?: string; rut: string; correo: string | null };
+
+/**
+ * Lista de correos con el formato que AFUCH devuelve validado: una fila de
+ * encabezados (opcionalmente bajo un título) y las columnas «RUT» y «Mail».
+ */
+export async function crearListaCorreosFicticia(
+  filas: FilaCorreoFicticia[],
+  {
+    encabezados = ['Nombre completo', 'RUT', 'Mail', 'Coincidencia'],
+    titulo,
+  }: { encabezados?: readonly string[]; titulo?: string } = {},
+): Promise<Buffer> {
+  const libro = new ExcelJS.Workbook();
+  const hoja = libro.addWorksheet('Socios con mail');
+  if (titulo) hoja.addRow([titulo]);
+  hoja.addRow([...encabezados]);
+  for (const fila of filas) hoja.addRow([fila.nombre ?? 'PRUEBA', fila.rut, fila.correo, 'Exacta']);
+  return Buffer.from(await libro.xlsx.writeBuffer());
+}

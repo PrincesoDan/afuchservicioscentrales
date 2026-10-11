@@ -41,13 +41,12 @@ export function FormularioIngreso() {
 
   return (
     <form onSubmit={manejarEnvio} noValidate className="space-y-6">
-      <Campo id="rut" etiqueta="RUT" error={errores.rut} requerido>
+      <Campo id="correo" etiqueta="Correo electrónico" error={errores.correo} requerido>
         <input
-          id="rut"
-          name="rut"
-          type="text"
+          id="correo"
+          name="correo"
+          type="email"
           autoComplete="username"
-          placeholder="12.345.678-5"
           className={CLASES_CAMPO}
         />
       </Campo>
@@ -62,7 +61,7 @@ export function FormularioIngreso() {
       </Campo>
       {fallo ? (
         <Aviso tipo="error">
-          RUT o contraseña incorrectos. Tras varios intentos fallidos la cuenta se bloquea 15
+          Correo o contraseña incorrectos. Tras varios intentos fallidos la cuenta se bloquea 15
           minutos.
         </Aviso>
       ) : null}

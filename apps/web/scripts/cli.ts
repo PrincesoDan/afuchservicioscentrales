@@ -197,7 +197,7 @@ async function main(): Promise<void> {
         .filter(Boolean)
         .join(' y ');
       console.log(
-        `Se rota: ${cuales}. Registros: ${r.socios} socios, ${r.cuentas} cuentas, ${r.administradores} admins.`,
+        `Se rota: ${cuales}. Registros: ${r.socios} socios (${r.correos} con correo), ${r.administradores} admins.`,
       );
       if (!r.aplicado) {
         console.log(

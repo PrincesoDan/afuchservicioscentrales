@@ -16,7 +16,7 @@ export default async function PaginaDatos() {
     ['Nombre', descifrar(socio.nombreCifrado)],
     ['RUT', formatearRut(descifrar(socio.rutCifrado))],
     ['Unidad o facultad', socio.facultad ?? '—'],
-    ['Correo de la cuenta', socio.cuenta ? descifrar(socio.cuenta.correoCifrado) : '—'],
+    ['Correo de la cuenta', socio.correoCifrado ? descifrar(socio.correoCifrado) : '—'],
   ] as const;
 
   return (

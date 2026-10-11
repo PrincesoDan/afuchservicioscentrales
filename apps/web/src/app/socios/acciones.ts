@@ -40,7 +40,7 @@ export async function accionRegistro(
   // Mismo mensaje para socios y no socios: la respuesta no revela quién está en la nómina.
   return {
     estado: 'listo',
-    mensaje: `Si tu RUT está en la nómina de socios, te enviamos un correo a ${resultado.data.correo} para confirmar tu cuenta. Revisa también la carpeta de spam.`,
+    mensaje: `Si ${resultado.data.correo} es el correo que AFUCH tiene registrado para ti, te enviamos un mensaje para confirmar tu cuenta. Revisa también la carpeta de spam.`,
   };
 }
 
@@ -54,11 +54,11 @@ export async function accionRecuperar(
   const ip = await ipCliente();
   if (!(await permitir('recuperacion', ip))) return DEMASIADOS_INTENTOS;
 
-  await solicitarRecuperacion(resultado.data.rut, ip);
+  await solicitarRecuperacion(resultado.data.correo, ip);
   return {
     estado: 'listo',
     mensaje:
-      'Si tu RUT tiene una cuenta activa, te enviamos un enlace al correo registrado. El enlace vence en 1 hora.',
+      'Si ese correo tiene una cuenta activa, te enviamos un enlace para restablecer la contraseña. El enlace vence en 1 hora.',
   };
 }
 
@@ -78,7 +78,7 @@ async function canjear(
   }
   return {
     estado: 'listo',
-    mensaje: 'Tu contraseña quedó guardada. Ya puedes ingresar con tu RUT.',
+    mensaje: 'Tu contraseña quedó guardada. Ya puedes ingresar con tu correo.',
   };
 }
 

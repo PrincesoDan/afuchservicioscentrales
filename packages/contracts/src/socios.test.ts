@@ -1,18 +1,43 @@
 import { describe, expect, it } from 'vitest';
-import { definirContrasenaSchema, registroSchema } from './socios';
+import {
+  correoSocioSchema,
+  definirContrasenaSchema,
+  ingresoSocioSchema,
+  registroSchema,
+} from './socios';
 
 describe('registroSchema', () => {
-  it('normaliza el RUT y el correo', () => {
-    const resultado = registroSchema.parse({ rut: '12.345.678-5', correo: ' Socia@UChile.cl ' });
-    expect(resultado).toEqual({ rut: '123456785', correo: 'socia@uchile.cl' });
+  it('normaliza el correo', () => {
+    expect(registroSchema.parse({ correo: ' Socia@UChile.cl ' })).toEqual({
+      correo: 'socia@uchile.cl',
+    });
+  });
+
+  it('rechaza un correo inválido o vacío', () => {
+    expect(registroSchema.safeParse({ correo: 'no-es-correo' }).success).toBe(false);
+    expect(registroSchema.safeParse({ correo: '  ' }).success).toBe(false);
+  });
+});
+
+describe('ingresoSocioSchema', () => {
+  it('identifica al socio por su correo normalizado', () => {
+    expect(ingresoSocioSchema.parse({ correo: 'SOCIA@uchile.cl', contrasena: 'x' })).toEqual({
+      correo: 'socia@uchile.cl',
+      contrasena: 'x',
+    });
+  });
+});
+
+describe('correoSocioSchema', () => {
+  it('normaliza RUT y correo', () => {
+    expect(correoSocioSchema.parse({ rut: '12.345.678-5', correo: ' A@B.cl' })).toEqual({
+      rut: '123456785',
+      correo: 'a@b.cl',
+    });
   });
 
   it('rechaza un RUT con DV incorrecto', () => {
-    expect(registroSchema.safeParse({ rut: '12.345.678-9', correo: 'a@b.cl' }).success).toBe(false);
-  });
-
-  it('rechaza un correo inválido', () => {
-    expect(registroSchema.safeParse({ rut: '12.345.678-5', correo: 'no-es-correo' }).success).toBe(
+    expect(correoSocioSchema.safeParse({ rut: '12.345.678-9', correo: 'a@b.cl' }).success).toBe(
       false,
     );
   });

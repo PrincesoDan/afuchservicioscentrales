@@ -16,33 +16,17 @@ export function FormularioRegistro() {
   return (
     <form action={accion} noValidate className="space-y-6">
       <Campo
-        id="rut"
-        etiqueta="RUT"
-        error={estado.errores?.rut}
-        ayuda="Con o sin puntos y guion."
-        requerido
-      >
-        <input
-          id="rut"
-          name="rut"
-          type="text"
-          autoComplete="username"
-          placeholder="12.345.678-5"
-          className={CLASES_CAMPO}
-        />
-      </Campo>
-      <Campo
         id="correo"
         etiqueta="Correo electrónico"
         error={estado.errores?.correo}
-        ayuda="Te enviaremos aquí el enlace para confirmar tu cuenta."
+        ayuda="Usa el correo que AFUCH tiene registrado para ti. Ahí te enviaremos el enlace para confirmar tu cuenta."
         requerido
       >
         <input
           id="correo"
           name="correo"
           type="email"
-          autoComplete="email"
+          autoComplete="username"
           className={CLASES_CAMPO}
         />
       </Campo>

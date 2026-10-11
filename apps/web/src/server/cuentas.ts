@@ -2,7 +2,7 @@ import 'server-only';
 import type { DefinirContrasenaInput, IngresoSocioInput, RegistroInput } from '@afuch/contracts';
 import { db, type TipoToken } from '@afuch/db';
 import { auditar } from './auditoria';
-import { cifrar, descifrar, generarToken, hashRut, hashToken } from './cifrado';
+import { descifrar, generarToken, hashCorreo, hashToken } from './cifrado';
 import { hashContrasena, verificarContrasena, verificarSenuelo } from './contrasenas';
 import { enviarCorreo, plantilla } from './correo';
 import { env } from './env';
@@ -34,31 +34,32 @@ function enlace(ruta: string, token: string): string {
 }
 
 /**
- * Registro (decisión D4): RUT de la whitelist + correo escrito por el socio.
- * Siempre termina sin error y sin decir si el RUT es socio; el resultado real
- * solo se conoce por el correo. Ver mitigaciones en el plan §3.1.
+ * Registro (decisión D4′): solo con el correo que AFUCH precargó para el socio.
+ * Siempre termina sin error y sin decir si el correo es de un socio; el
+ * resultado real solo se conoce por el mensaje que llega a ese correo.
  */
-export async function registrar({ rut, correo }: RegistroInput, ip: string): Promise<void> {
+export async function registrar({ correo }: RegistroInput, ip: string): Promise<void> {
   const socio = await db().socio.findUnique({
-    where: { rutHash: hashRut(rut) },
+    where: { correoHash: hashCorreo(correo) },
     include: { cuenta: true },
   });
 
-  if (!socio || !socio.habilitado) {
+  if (!socio || !socio.habilitado || !socio.correoCifrado) {
     await auditar({
       actorTipo: 'ANONIMO',
       accion: 'registro.rechazado',
       ip,
-      detalle: { motivo: socio ? 'deshabilitado' : 'fuera_de_nomina' },
+      detalle: { motivo: socio ? 'deshabilitado' : 'correo_no_registrado' },
     });
     return;
   }
+  // Se envía al correo guardado, no al texto recibido: es el dato que validó AFUCH.
+  const para = descifrar(socio.correoCifrado);
 
   if (socio.cuenta?.verificadaEn) {
-    // Ya tiene cuenta: se avisa al correo registrado, sin cambiar nada.
     const { html, texto } = plantilla({
       parrafos: [
-        'Alguien intentó crear una cuenta en el área de socios de AFUCH Servicios Centrales con tu RUT, pero tu RUT ya tiene una cuenta activa.',
+        'Alguien intentó crear una cuenta en el área de socios de AFUCH Servicios Centrales con este correo, pero ya tienes una cuenta activa.',
         'Si fuiste tú y no recuerdas tu contraseña, puedes restablecerla. Si no fuiste tú, no necesitas hacer nada.',
       ],
       boton: {
@@ -66,12 +67,7 @@ export async function registrar({ rut, correo }: RegistroInput, ip: string): Pro
         url: `${env().NEXTAUTH_URL.replace(/\/$/, '')}/socios/recuperar`,
       },
     });
-    await enviarCorreo({
-      para: descifrar(socio.cuenta.correoCifrado),
-      asunto: 'Intento de registro con tu RUT',
-      html,
-      texto,
-    });
+    await enviarCorreo({ para, asunto: 'Ya tienes una cuenta de socio', html, texto });
     await auditar({
       actorTipo: 'ANONIMO',
       accion: 'registro.ya_registrado',
@@ -82,13 +78,7 @@ export async function registrar({ rut, correo }: RegistroInput, ip: string): Pro
     return;
   }
 
-  // Sin cuenta, o con registro sin verificar: el último correo ingresado reemplaza al anterior.
-  const cuenta = socio.cuenta
-    ? await db().cuenta.update({
-        where: { id: socio.cuenta.id },
-        data: { correoCifrado: cifrar(correo) },
-      })
-    : await db().cuenta.create({ data: { socioId: socio.id, correoCifrado: cifrar(correo) } });
+  const cuenta = socio.cuenta ?? (await db().cuenta.create({ data: { socioId: socio.id } }));
 
   const token = await emitirToken(cuenta.id, 'VERIFICACION');
   const { html, texto } = plantilla({
@@ -102,7 +92,7 @@ export async function registrar({ rut, correo }: RegistroInput, ip: string): Pro
       url: enlace('/socios/verificar', token),
     },
   });
-  await enviarCorreo({ para: correo, asunto: 'Confirma tu cuenta de socio', html, texto });
+  await enviarCorreo({ para, asunto: 'Confirma tu cuenta de socio', html, texto });
   await auditar({
     actorTipo: 'ANONIMO',
     accion: 'registro.solicitado',
@@ -159,12 +149,12 @@ export async function definirContrasena(
 }
 
 /** Siempre termina sin error; si corresponde, envía el enlace al correo registrado. */
-export async function solicitarRecuperacion(rut: string, ip: string): Promise<void> {
+export async function solicitarRecuperacion(correo: string, ip: string): Promise<void> {
   const socio = await db().socio.findUnique({
-    where: { rutHash: hashRut(rut) },
+    where: { correoHash: hashCorreo(correo) },
     include: { cuenta: true },
   });
-  if (!socio?.habilitado || !socio.cuenta?.verificadaEn) {
+  if (!socio?.habilitado || !socio.correoCifrado || !socio.cuenta?.verificadaEn) {
     await auditar({ actorTipo: 'ANONIMO', accion: 'recuperacion.rechazada', ip });
     return;
   }
@@ -177,7 +167,7 @@ export async function solicitarRecuperacion(rut: string, ip: string): Promise<vo
     boton: { texto: 'Restablecer contraseña', url: enlace('/socios/restablecer', token) },
   });
   await enviarCorreo({
-    para: descifrar(socio.cuenta.correoCifrado),
+    para: descifrar(socio.correoCifrado),
     asunto: 'Restablece tu contraseña',
     html,
     texto,
@@ -193,13 +183,13 @@ export async function solicitarRecuperacion(rut: string, ip: string): Promise<vo
 
 export type SesionSocio = { socioId: string; cuentaId: string };
 
-/** Devuelve los ids de la sesión si RUT y contraseña son correctos y la cuenta está en condiciones de ingresar. */
+/** Devuelve los ids de la sesión si correo y contraseña son correctos y la cuenta está en condiciones de ingresar. */
 export async function verificarIngresoSocio(
-  { rut, contrasena }: IngresoSocioInput,
+  { correo, contrasena }: IngresoSocioInput,
   ip: string,
 ): Promise<SesionSocio | null> {
   const socio = await db().socio.findUnique({
-    where: { rutHash: hashRut(rut) },
+    where: { correoHash: hashCorreo(correo) },
     include: { cuenta: true },
   });
   const cuenta = socio?.cuenta;
