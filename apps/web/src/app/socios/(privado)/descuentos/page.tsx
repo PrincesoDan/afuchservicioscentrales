@@ -18,7 +18,7 @@ export default async function PaginaDescuentos({ searchParams }: Props) {
   if (!actual) {
     return (
       <div className="rounded-xl border border-dashed border-slate-300 py-16 text-center">
-        <p className="text-slate-600">Todavía no hay descuentos cargados para tu RUT.</p>
+        <p className="text-slate-600">Todavía no hay descuentos cargados para tu cuenta.</p>
       </div>
     );
   }
@@ -33,7 +33,8 @@ export default async function PaginaDescuentos({ searchParams }: Props) {
         </h1>
         <p className="mt-2 text-sm text-slate-600">
           Montos descontados por planilla según la información entregada por AFUCH Servicios
-          Centrales.
+          Centrales. El total considera solo los conceptos de esta tabla y puede no coincidir con el
+          total de descuentos de tu liquidación.
         </p>
 
         <div className="mt-6 overflow-hidden rounded-xl border border-slate-200">

@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { SEDE } from '@/content/sede';
+import { FENAFUCH, SEDE } from '@/content/sede';
 import { Container } from './ui/container';
 
 const ENLACES = [
@@ -26,6 +26,7 @@ export function SiteFooter() {
               className="h-10 w-auto"
             />
             <p className="mt-5 max-w-sm text-sm/6 text-navy-200">{SEDE.nombreLargo}</p>
+            <p className="mt-3 max-w-sm text-sm/6 text-navy-200">{FENAFUCH.resumen}</p>
           </div>
 
           <nav aria-label="Enlaces del sitio">
@@ -56,13 +57,6 @@ export function SiteFooter() {
                 </a>
               </p>
             </address>
-            <div className="mt-5 space-y-1 text-sm text-navy-200">
-              {SEDE.horarios.map(({ dias, horario }) => (
-                <p key={dias}>
-                  <span className="text-navy-100">{dias}:</span> {horario}
-                </p>
-              ))}
-            </div>
           </div>
         </div>
 

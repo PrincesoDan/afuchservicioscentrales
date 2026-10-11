@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { BotonLink } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { EncabezadoSeccion } from '@/components/ui/encabezado-seccion';
 import { DIRECTIVA } from '@/content/directiva';
-import { SEDE } from '@/content/sede';
+import { FENAFUCH, SEDE } from '@/content/sede';
 
 export const metadata: Metadata = {
   title: 'Quiénes somos',
@@ -28,6 +29,16 @@ const PRINCIPIOS = [
       'Las cuentas de la asociación se rinden a sus socios, no solo a quienes asisten a la asamblea.',
   },
 ] as const;
+
+/** Respaldo cuando falta la fotografía; «?» mientras el nombre siga pendiente. */
+function iniciales(nombre: string): string {
+  if (nombre === 'Por confirmar') return '?';
+  return nombre
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((parte) => parte.charAt(0).toUpperCase())
+    .join('');
+}
 
 export default function PaginaQuienesSomos() {
   return (
@@ -61,6 +72,16 @@ export default function PaginaQuienesSomos() {
                   representar sus intereses ante la institución, negociar beneficios colectivos y
                   administrar un fondo solidario que responde en los momentos difíciles.
                 </p>
+              </div>
+
+              <h2 className="mt-14 text-3xl font-bold tracking-tight text-balance text-navy-900">
+                Somos parte de la {FENAFUCH.nombre}
+              </h2>
+              <div className="mt-6 space-y-3 text-base/8 text-slate-700">
+                <p>
+                  {FENAFUCH.resumen} {FENAFUCH.detalle}
+                </p>
+                <p className="text-sm/6 text-slate-500">{FENAFUCH.nombreLargo}.</p>
               </div>
 
               <h2 className="mt-14 text-3xl font-bold tracking-tight text-balance text-navy-900">
@@ -115,17 +136,27 @@ export default function PaginaQuienesSomos() {
           </p>
 
           <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
-            {DIRECTIVA.map(({ nombre, cargo }) => (
+            {DIRECTIVA.map(({ nombre, cargo, foto }) => (
               <li
                 key={cargo}
                 className="rounded-xl border border-slate-200 bg-white p-6 text-center"
               >
-                <div
-                  aria-hidden="true"
-                  className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-navy-100 text-2xl font-bold text-navy-400"
-                >
-                  ?
-                </div>
+                {foto ? (
+                  <Image
+                    src={foto.src}
+                    alt={foto.alt}
+                    width={160}
+                    height={160}
+                    className="mx-auto mb-4 h-20 w-20 rounded-full object-cover"
+                  />
+                ) : (
+                  <div
+                    aria-hidden="true"
+                    className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-navy-100 text-2xl font-bold text-navy-400"
+                  >
+                    {iniciales(nombre)}
+                  </div>
+                )}
                 <p className="font-bold text-navy-900">{nombre}</p>
                 <p className="mt-1 text-sm text-slate-600">{cargo}</p>
               </li>

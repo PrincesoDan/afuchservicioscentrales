@@ -7,6 +7,7 @@ import { Container } from '@/components/ui/container';
 import { EncabezadoSeccion } from '@/components/ui/encabezado-seccion';
 import { CONVENIOS } from '@/content/convenios';
 import { NOTICIAS } from '@/content/noticias';
+import { FENAFUCH } from '@/content/sede';
 import { formatearClp } from '@/lib/convenios';
 
 const destacados = CONVENIOS.filter((convenio) => convenio.destacado);
@@ -105,6 +106,23 @@ export default function PaginaInicio() {
             {destacados.map((convenio) => (
               <TarjetaConvenio key={convenio.slug} convenio={convenio} />
             ))}
+          </div>
+        </Container>
+      </section>
+
+      <section className="border-y border-slate-200 bg-navy-50 py-14 lg:py-16">
+        <Container>
+          <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-14">
+            <div>
+              <p className="eyebrow mb-3 text-navy-600">{FENAFUCH.nombre}</p>
+              <h2 className="text-2xl font-bold tracking-tight text-balance text-navy-900 sm:text-3xl">
+                {FENAFUCH.resumen}
+              </h2>
+            </div>
+            <div>
+              <p className="text-base/7 text-slate-700">{FENAFUCH.detalle}</p>
+              <p className="mt-3 text-sm/6 text-slate-500">{FENAFUCH.nombreLargo}.</p>
+            </div>
           </div>
         </Container>
       </section>

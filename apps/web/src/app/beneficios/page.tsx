@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { CatalogoConvenios } from '@/components/catalogo-convenios';
 import { Container } from '@/components/ui/container';
 import { CONVENIOS } from '@/content/convenios';
+import { FENAFUCH } from '@/content/sede';
 
 export const metadata: Metadata = {
   title: 'Convenios y beneficios',
@@ -27,6 +28,10 @@ export default function PaginaBeneficios() {
 
       <section className="py-14 lg:py-20">
         <Container>
+          <div className="mb-12 rounded-xl border border-slate-200 bg-navy-50 p-6 sm:p-7">
+            <h2 className="text-lg font-bold text-navy-900">{FENAFUCH.resumen}</h2>
+            <p className="mt-2 max-w-3xl text-base/7 text-slate-700">{FENAFUCH.detalle}</p>
+          </div>
           <CatalogoConvenios convenios={CONVENIOS} />
         </Container>
       </section>

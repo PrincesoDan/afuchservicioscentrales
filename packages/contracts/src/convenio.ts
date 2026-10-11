@@ -37,10 +37,25 @@ export const vigenciaSchema = z.union([
   }),
 ]);
 
+/** Quién ofrece el convenio: la asociación o la federación (decisión D13). */
+export const origenConvenioSchema = z.enum(['afuch-sc', 'fenafuch']);
+
+export type OrigenConvenio = z.infer<typeof origenConvenioSchema>;
+
+export const ORIGENES_CONVENIO: Record<OrigenConvenio, string> = {
+  'afuch-sc': 'AFUCH Servicios Centrales',
+  fenafuch: 'FENAFUCH',
+};
+
 export const convenioSchema = z.object({
   slug: z.string().min(1),
   nombre: z.string().min(1),
   categoria: categoriaConvenioSchema,
+  /**
+   * Opcional mientras AFUCH no entregue la clasificación (pendiente A2 del plan
+   * 2026-10-11): sin dato no se muestra etiqueta, para no atribuir a ciegas.
+   */
+  origen: origenConvenioSchema.optional(),
   /** Una o dos líneas para la tarjeta del listado. */
   resumen: z.string().min(1),
   /** Párrafo de contexto para la ficha. */

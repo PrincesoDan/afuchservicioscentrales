@@ -2,6 +2,8 @@ export type MiembroDirectiva = {
   nombre: string;
   cargo: string;
   unidad?: string;
+  /** Archivo en `public/directiva/` (WebP, cuadrado). Sin foto se muestran las iniciales. */
+  foto?: { src: string; alt: string };
 };
 
 /**

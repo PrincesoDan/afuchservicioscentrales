@@ -150,7 +150,7 @@ se versionan (están en `.gitignore`).
 | `NEXTAUTH_SECRET`         | Sí            | Firma las sesiones. Cambiarla cierra todas las sesiones                                                                      |
 | `NEXTAUTH_URL`            | Sí            | URL pública del sitio; se usa en los enlaces de los correos                                                                  |
 | `RESEND_API_KEY`          | En producción | API key de Resend. Sin ella (solo desarrollo) los correos se imprimen en consola                                             |
-| `CORREO_REMITENTE`        | No            | Remitente. Por defecto `AFUCH Servicios Centrales <no-responder@afuchscen.cl>`                                               |
+| `CORREO_REMITENTE`        | No            | Remitente. Por defecto `AFUCH Servicios Centrales <contacto@afuchscen.cl>`                                                   |
 | `CORREO_CONTACTO_DESTINO` | No            | Dónde llegan los mensajes del formulario. Por defecto `contacto@afuchscen.cl`                                                |
 | `STORAGE_DIR`             | No            | Carpeta de los PDF de rendición. Por defecto `./storage`                                                                     |
 | `CORREO_BUZON_DIR`        | No            | Solo desarrollo: guarda cada correo como archivo JSON                                                                        |

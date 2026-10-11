@@ -18,6 +18,16 @@ export const NOMBRE_CONCEPTO: Record<ConceptoDescuento, string> = {
 
 const ORDEN = Object.keys(NOMBRE_CONCEPTO) as ConceptoDescuento[];
 
+/**
+ * Decisión D12 (reunión con AFUCH, 2026-10-11): estos conceptos no se muestran
+ * ni se suman en «Mis descuentos». Se siguen importando y el admin los ve
+ * completos; por eso el total del socio puede no calzar con su liquidación.
+ */
+export const CONCEPTOS_OCULTOS: readonly ConceptoDescuento[] = [
+  'OPTICA_GO_OPTIC',
+  'REINTEGRO_BONO_INVIERNO',
+];
+
 export type ResumenPeriodo = { id: string; anio: number; mes: number; total: number };
 
 export type LineaVisible = {
@@ -31,7 +41,7 @@ export type LineaVisible = {
 export async function periodosDelSocio(socioId: string): Promise<ResumenPeriodo[]> {
   const grupos = await db().lineaDescuento.groupBy({
     by: ['periodoId'],
-    where: { socioId },
+    where: { socioId, concepto: { notIn: [...CONCEPTOS_OCULTOS] } },
     _sum: { monto: true },
   });
   if (grupos.length === 0) return [];
@@ -49,7 +59,9 @@ export async function periodosDelSocio(socioId: string): Promise<ResumenPeriodo[
 }
 
 export async function detallePeriodo(socioId: string, periodoId: string): Promise<LineaVisible[]> {
-  const lineas = await db().lineaDescuento.findMany({ where: { socioId, periodoId } });
+  const lineas = await db().lineaDescuento.findMany({
+    where: { socioId, periodoId, concepto: { notIn: [...CONCEPTOS_OCULTOS] } },
+  });
   return lineas
     .map((l) => ({
       concepto: l.concepto,

@@ -11,9 +11,18 @@ export const SEDE = {
   region: 'Región Metropolitana',
   telefono: '+56 2 2978 0000',
   email: 'contacto@afuchscen.cl',
-  horarios: [
-    { dias: 'Lunes a jueves', horario: '9:00 a 17:30' },
-    { dias: 'Viernes', horario: '9:00 a 16:30' },
-  ],
   estatutosUrl: 'https://www.scribd.com/document/738076080/ESTATUTO-AFUCHSCEN',
+} as const;
+
+/**
+ * Relación con la federación (decisión D13). Texto entregado por La Palanca tras
+ * la reunión con AFUCH del 2026-10-11; no se reescribe sin su aprobación.
+ */
+export const FENAFUCH = {
+  nombre: 'FENAFUCH',
+  nombreLargo:
+    'Federación Nacional de Asociaciones de Funcionarios y Funcionarias de la Universidad de Chile',
+  resumen: 'AFUCH Servicios Centrales es parte de la FENAFUCH.',
+  detalle:
+    'Todas las personas afiliadas a AFUCH Servicios Centrales son parte de la FENAFUCH y, por ende, tienen acceso a todos los beneficios y convenios que tiene la federación.',
 } as const;

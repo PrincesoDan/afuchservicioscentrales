@@ -1,4 +1,4 @@
-import type { Convenio } from '@afuch/contracts';
+import { ORIGENES_CONVENIO, type Convenio } from '@afuch/contracts';
 import Link from 'next/link';
 import { ChipCategoria } from './ui/chip-categoria';
 
@@ -7,6 +7,11 @@ export function TarjetaConvenio({ convenio }: { convenio: Convenio }) {
     <article className="group relative flex h-full flex-col rounded-xl border border-slate-200 bg-white p-6 transition-all hover:border-navy-200 hover:shadow-lg hover:shadow-navy-900/5">
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <ChipCategoria categoria={convenio.categoria} />
+        {convenio.origen ? (
+          <span className="inline-flex items-center rounded-full bg-navy-50 px-2.5 py-1 text-xs font-medium text-navy-800">
+            {ORIGENES_CONVENIO[convenio.origen]}
+          </span>
+        ) : null}
         {convenio.extensivoGrupoFamiliar ? (
           <span className="inline-flex items-center rounded-full border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600">
             Grupo familiar

@@ -59,18 +59,6 @@ export default function PaginaContacto() {
                   </p>
                 </address>
               </div>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-6">
-                <h2 className="eyebrow mb-4 text-navy-600">Horarios de atención</h2>
-                <dl className="space-y-3 text-sm/6">
-                  {SEDE.horarios.map(({ dias, horario }) => (
-                    <div key={dias} className="flex justify-between gap-4">
-                      <dt className="text-slate-600">{dias}</dt>
-                      <dd className="font-semibold text-navy-900">{horario}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
             </aside>
           </div>
         </Container>
