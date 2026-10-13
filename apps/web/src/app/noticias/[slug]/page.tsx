@@ -7,6 +7,7 @@ import { TextoEnriquecido } from '@/components/texto-enriquecido';
 import { Container } from '@/components/ui/container';
 import { NOTICIAS } from '@/content/noticias';
 import { formatearFecha } from '@/lib/convenios';
+import { OPEN_GRAPH_BASE } from '@/lib/metadatos';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: noticia.titulo,
     description: noticia.bajada,
-    openGraph: { type: 'article', publishedTime: noticia.fecha },
+    openGraph: { ...OPEN_GRAPH_BASE, type: 'article', publishedTime: noticia.fecha },
   };
 }
 

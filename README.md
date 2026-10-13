@@ -240,7 +240,7 @@ Generar claves:
 ```bash
 openssl rand -base64 32   # CLAVE_CIFRADO, CLAVE_HMAC
 openssl rand -base64 48   # NEXTAUTH_SECRET
-openssl rand -base64 24   # POSTGRES_PASSWORD
+openssl rand -hex 24      # POSTGRES_PASSWORD (hexadecimal: va dentro de una URL)
 ```
 
 Guardar `CLAVE_CIFRADO`, `CLAVE_HMAC` y la clave de respaldos también **fuera del servidor**
@@ -359,6 +359,9 @@ dc run --rm herramientas pnpm cli admin:crear persona@lapalanca.cl
 ```
 
 Respaldos: `infra/respaldo/respaldar.sh` (cron diario) y `restaurar.sh`.
+
+Antes de apuntar el dominio real conviene ensayar todo en un subdominio de prueba con socios
+ficticios: runbook §4.1.
 
 ## 10. Lo que falta configurar (fuera del código)
 

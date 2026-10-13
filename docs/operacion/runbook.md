@@ -14,13 +14,27 @@ alias dc='docker compose -f /opt/afuch/infra/docker-compose.yml --env-file /opt/
 ## 1. Requisitos del VPS
 
 - Ubuntu Server LTS, 2 vCPU, 2–4 GB RAM, 40 GB de disco (referencial; ~900 socios).
-- Docker Engine con el plugin `docker compose`.
+- Docker Engine con el plugin `docker compose` (script oficial; no usar el «Administrador de
+  Docker» del panel del proveedor, para no tener dos formas de operar los mismos contenedores):
+  ```bash
+  curl -fsSL https://get.docker.com | sh
+  docker run --rm hello-world && docker compose version
+  ```
 - `openssl` y `rclone` (copia de respaldos fuera del VPS).
-- Contratado a nombre de AFUCH (propuesta §6). Proveedor: pendiente (plan, P11).
+- Contratado a nombre de AFUCH (propuesta §6). El ensayo de octubre de 2026 corre en un
+  Hostinger KVM 2; la titularidad a nombre de AFUCH sigue pendiente de confirmar (plan, P11).
 
 ## 2. Endurecimiento inicial
 
 1. Crear un usuario sin privilegios de root para operar; deshabilitar el ingreso SSH de `root` y por contraseña (`PermitRootLogin no`, `PasswordAuthentication no`). Solo llaves SSH.
+   ```bash
+   printf 'PermitRootLogin no\nPasswordAuthentication no\n' > /etc/ssh/sshd_config.d/00-afuch.conf
+   sshd -t && systemctl restart ssh
+   sshd -T | grep -E '^(permitrootlogin|passwordauthentication)'
+   ```
+   El archivo se llama `00-…` porque SSH aplica el primer valor que lee y así gana sobre la
+   configuración que deja el proveedor. Probar el ingreso en otra terminal antes de cerrar la
+   sesión abierta. Si se opera como `root`, usar al menos `PermitRootLogin prohibit-password`.
 2. Firewall: permitir solo 22, 80 y 443.
    ```bash
    ufw default deny incoming && ufw allow 22/tcp && ufw allow 80/tcp && ufw allow 443 && ufw enable
@@ -32,15 +46,19 @@ alias dc='docker compose -f /opt/afuch/infra/docker-compose.yml --env-file /opt/
 ## 3. DNS y correo
 
 - Registro `A` (y `AAAA` si aplica) de `afuchscen.cl` y `www.afuchscen.cl` hacia la IP del VPS. Caddy obtiene el certificado HTTPS solo cuando el DNS apunta al VPS.
+- Los DNS del dominio se administran en Vercel (nameservers `vercel-dns.com`), donde también
+  vive el sitio anterior. Para el cambio: quitar `afuchscen.cl` y `www` del proyecto de Vercel
+  y recién entonces crear los registros `A`. No tocar el `MX` ni los registros de Resend.
 - Resend: agregar el dominio y crear los registros SPF/DKIM que indique el panel. Sin eso, los correos de verificación caen en spam.
 
 ## 4. Primer despliegue
 
 ```bash
 sudo mkdir -p /opt/afuch && sudo chown "$USER" /opt/afuch
-git clone <repo> /opt/afuch && cd /opt/afuch
+git clone https://github.com/PrincesoDan/afuchservicioscentrales.git /opt/afuch && cd /opt/afuch
 cp infra/.env.example infra/.env && chmod 600 infra/.env
 # Completar infra/.env: generar cada clave con openssl (ver comentarios del archivo).
+# POSTGRES_PASSWORD en hexadecimal (openssl rand -hex 24): va dentro de DATABASE_URL.
 ```
 
 **Guardar `CLAVE_CIFRADO`, `CLAVE_HMAC` y la clave de respaldos también fuera del VPS**
@@ -58,6 +76,38 @@ dc run --rm herramientas pnpm cli admin:crear persona@lapalanca.cl
 autenticadora (Google Authenticator, 1Password, etc.) y guardar la contraseña en el gestor.
 
 Verificar: `https://www.afuchscen.cl` responde, `/admin/ingreso` permite entrar.
+
+### 4.1 Ensayo en un subdominio de prueba
+
+Para revisar todo sin tocar el sitio en línea, el primer despliegue se hace con
+`DOMINIO=prueba.afuchscen.cl` y `NEXTAUTH_URL=https://www.prueba.afuchscen.cl`, y dos registros
+`A` hacia el VPS: `prueba` y `www.prueba` (el `Caddyfile` sirve `www.<DOMINIO>` y redirige el
+dominio desnudo). Comprobar con `dig +short www.prueba.afuchscen.cl` antes de `dc up -d`.
+
+Socios ficticios con correos reales de quienes revisan (README §4, «Datos de prueba»):
+
+```bash
+# En el VPS:
+mkdir -p /opt/afuch/infra/entrada
+# En el equipo local: sube el padrón de prueba (Nombre, apellidos y Mail; hasta 9 personas).
+scp info/test-1.xlsx root@<ip>:/opt/afuch/infra/entrada/
+# En el VPS:
+dc run --rm herramientas pnpm cli prueba:cargar /entrada/test-1.xlsx              # vista previa
+dc run --rm herramientas pnpm cli prueba:cargar /entrada/test-1.xlsx --confirmar
+shred -u /opt/afuch/infra/entrada/test-1.xlsx
+```
+
+Cada persona queda con un RUT ficticio (`11.111.111-1`, `22.222.222-2`, …) y dos meses de
+descuentos inventados; se registra en `/socios/registro` con su correo. Los correos se envían
+de verdad por Resend.
+
+**Antes de pasar a producción**, quitar lo ficticio y cambiar el dominio:
+
+1. `dc run --rm herramientas pnpm cli socio:eliminar <rut-ficticio> --confirmar` por cada
+   socio de prueba (o partir de una base vacía, con consentimiento explícito para borrar el
+   volumen).
+2. En `infra/.env`: `DOMINIO=afuchscen.cl` y `NEXTAUTH_URL=https://www.afuchscen.cl`; `dc up -d`.
+3. DNS del dominio real (sección 3) y borrar los registros `prueba` y `www.prueba`.
 
 ## 5. Carga mensual
 

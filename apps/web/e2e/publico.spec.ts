@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { SEDE } from '../src/content/sede';
 
 test('navegación principal del sitio público', async ({ page, isMobile }) => {
   await page.goto('/');
@@ -60,4 +61,27 @@ test('muestra errores de validación del contacto', async ({ page }) => {
   await page.goto('/contacto');
   await page.getByRole('button', { name: 'Enviar mensaje' }).click();
   await expect(page.getByText('Ingresa tu nombre')).toBeVisible();
+});
+
+test('las páginas públicas traen la vista previa para compartir el enlace', async ({ page }) => {
+  for (const ruta of [
+    '/',
+    '/beneficios',
+    '/noticias/rectora-mizala-primera-reunion-directiva-fenafuch',
+  ]) {
+    await page.goto(ruta);
+    const contenido = (propiedad: string) =>
+      page.locator(`meta[property="${propiedad}"]`).getAttribute('content');
+
+    expect(await contenido('og:title')).toBeTruthy();
+    expect(await contenido('og:description')).toBeTruthy();
+    expect(await contenido('og:image')).toBe(`${SEDE.sitioUrl}/og.png`);
+    expect(await contenido('og:image:width')).toBe('1200');
+    expect(await contenido('og:image:height')).toBe('630');
+    expect(await contenido('og:url')).toBe(`${SEDE.sitioUrl}${ruta === '/' ? '' : ruta}`);
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+      'content',
+      'summary_large_image',
+    );
+  }
 });

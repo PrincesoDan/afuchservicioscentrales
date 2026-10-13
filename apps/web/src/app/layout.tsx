@@ -5,6 +5,7 @@ import { BarraInferior } from '@/components/barra-inferior';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { SEDE } from '@/content/sede';
+import { OPEN_GRAPH_BASE } from '@/lib/metadatos';
 import './globals.css';
 
 /**
@@ -27,12 +28,8 @@ export const metadata: Metadata = {
   },
   description:
     'Asociación de Funcionarios de la Universidad de Chile, Servicios Centrales. Convenios, beneficios y Fondo Solidario para trabajadoras y trabajadores de la Casa de Bello.',
-  openGraph: {
-    type: 'website',
-    locale: 'es_CL',
-    siteName: 'AFUCH Servicios Centrales',
-    images: ['/og.png'],
-  },
+  alternates: { canonical: './' },
+  openGraph: OPEN_GRAPH_BASE,
   icons: { icon: '/icon.png' },
 };
 
