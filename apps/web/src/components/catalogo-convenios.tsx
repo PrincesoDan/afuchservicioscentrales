@@ -1,25 +1,33 @@
 'use client';
 
-import { CATEGORIAS_CONVENIO, type CategoriaConvenio, type Convenio } from '@afuch/contracts';
+import {
+  CATEGORIAS_CONVENIO,
+  ORIGENES_CONVENIO,
+  type CategoriaConvenio,
+  type Convenio,
+  type OrigenConvenio,
+} from '@afuch/contracts';
 import { useMemo, useState } from 'react';
 import { categoriasConContenido, filtrarConvenios } from '@/lib/convenios';
 import { TarjetaConvenio } from './tarjeta-convenio';
 
 export function CatalogoConvenios({ convenios }: { convenios: readonly Convenio[] }) {
   const [categoria, setCategoria] = useState<CategoriaConvenio | undefined>(undefined);
+  const [origen, setOrigen] = useState<OrigenConvenio | undefined>(undefined);
   const [busqueda, setBusqueda] = useState('');
   const [soloGrupoFamiliar, setSoloGrupoFamiliar] = useState(false);
 
   const categorias = useMemo(() => categoriasConContenido(convenios), [convenios]);
   const resultados = useMemo(
-    () => filtrarConvenios(convenios, { categoria, busqueda, soloGrupoFamiliar }),
-    [convenios, categoria, busqueda, soloGrupoFamiliar],
+    () => filtrarConvenios(convenios, { categoria, origen, busqueda, soloGrupoFamiliar }),
+    [convenios, categoria, origen, busqueda, soloGrupoFamiliar],
   );
 
-  const hayFiltros = Boolean(categoria || busqueda || soloGrupoFamiliar);
+  const hayFiltros = Boolean(categoria || origen || busqueda || soloGrupoFamiliar);
 
   function limpiarFiltros() {
     setCategoria(undefined);
+    setOrigen(undefined);
     setBusqueda('');
     setSoloGrupoFamiliar(false);
   }
@@ -51,6 +59,36 @@ export function CatalogoConvenios({ convenios }: { convenios: readonly Convenio[
             />
             Solo con cobertura familiar
           </label>
+        </div>
+
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por quién ofrece">
+          <button
+            type="button"
+            onClick={() => setOrigen(undefined)}
+            aria-pressed={origen === undefined}
+            className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
+              origen === undefined
+                ? 'bg-navy-800 text-white'
+                : 'border border-slate-300 bg-white text-slate-700 hover:border-navy-400'
+            }`}
+          >
+            AFUCH y FENAFUCH
+          </button>
+          {(Object.keys(ORIGENES_CONVENIO) as OrigenConvenio[]).map((clave) => (
+            <button
+              key={clave}
+              type="button"
+              onClick={() => setOrigen(clave)}
+              aria-pressed={origen === clave}
+              className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
+                origen === clave
+                  ? 'bg-navy-800 text-white'
+                  : 'border border-slate-300 bg-white text-slate-700 hover:border-navy-400'
+              }`}
+            >
+              Convenios {ORIGENES_CONVENIO[clave]}
+            </button>
+          ))}
         </div>
 
         <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por categoría">

@@ -12,6 +12,7 @@ export const metadata: Metadata = { robots: { index: false } };
 const PESTANAS = [
   { href: '/socios/descuentos', texto: 'Mis descuentos' },
   { href: '/socios/rendicion', texto: 'Rendición de cuentas' },
+  { href: '/socios/gas', texto: 'Vale de gas' },
   { href: '/socios/datos', texto: 'Mis datos' },
 ] as const;
 

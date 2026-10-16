@@ -15,6 +15,13 @@ export const ASOCIACION = {
       'Registro de Asociaciones de Funcionarios de la Inspección Provincial del Trabajo de Santiago',
   },
   afiliacionFenafuch: '2 de noviembre de 2011',
+  /** Entregado por AFUCH el 2026-10-15. */
+  rut: '75.910.300-9',
+  /** Misión y visión entregadas por AFUCH el 2026-10-15; se transcriben sin reescribir. */
+  mision:
+    'Representar, unir y defender con probidad, transparencia y perspectiva de género a las y los más de 900 funcionarios de la Universidad de Chile. Articulamos la labor gremial en facultades, institutos, vicerrectorías y unidades clave, respaldados por nuestras filiales territoriales en Derecho, Gobierno, Artes, Arquitectura, CEAC y SEMDA. En conformidad con la Ley N° 19.296 y nuestros Estatutos, promovemos el mejoramiento económico, social, la capacitación y el bienestar de los asociados, resguardando activamente ambientes laborales seguros, saludables y libres de acoso o violencia (Ley Karin / Ley N° 21.643). A través de nuestras filiales y representantes en los consejos de FENAFUCH, y gracias a ello los trabajadores estamos afiliados a la CUT, por ello Fenafuch participa en la Mesa del Sector Público, incide en las decisiones institucionales y en las negociaciones colectivas de reajuste presupuestario nacional e institucional.',
+  vision:
+    'Ser una asociación gremial de base referente por su probidad, transparencia de gestión y compromiso democrático, que consolide la unidad e integración descentralizada de todo el personal de la Universidad de Chile. Aspiramos a ser un espacio sindical transparente que transforme las diversas demandas de las bases en logros colectivos, defendiendo la carrera funcionaria y garantizando un entorno de trabajo digno, equitativo y protector de la integridad física y mental de cada trabajadora y trabajador.',
   /** Estatutos, art. 2: objeto de la asociación, letras a) a h). */
   objetivos: [
     'Promover el mejoramiento económico de sus afiliados y de sus condiciones de vida y de trabajo.',

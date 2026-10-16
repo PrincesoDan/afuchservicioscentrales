@@ -112,9 +112,10 @@ Monorepo pnpm + Turborepo. **Solo Next.js** (no hay API separada).
 - `rate-limiter-flexible`, `exceljs` y `@node-rs/argon2` van en `serverExternalPackages`.
 - `prisma.config.ts` usa `process.env.DATABASE_URL` (no `env()`) para que `prisma generate`
   funcione sin base (build, CI, Docker).
-- El dominio es `afuchscen.cl`; el sitio canónico es `https://www.afuchscen.cl` y el correo
-  `contacto@afuchscen.cl`. Úsalos desde `SEDE.sitioUrl` / `SEDE.email` (o `env()` en el servidor),
-  no los escribas a mano.
+- El dominio es `afuchscen.cl`; el sitio canónico es `https://www.afuchscen.cl`. El correo de
+  contacto es `afuchscen@gmail.com`; los automáticos salen desde `contacto@afuchscen.cl`
+  (Resend solo envía desde el dominio verificado). Úsalos desde `SEDE.sitioUrl` / `SEDE.email`
+  (o `env()` en el servidor), no los escribas a mano.
 
 ## Skills del proyecto
 

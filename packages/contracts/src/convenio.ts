@@ -12,6 +12,7 @@ export const categoriaConvenioSchema = z.enum([
   'gas',
   'funeraria',
   'educacion',
+  'asesoria',
   'recreacion',
   'comercio',
 ]);
@@ -25,6 +26,7 @@ export const CATEGORIAS_CONVENIO: Record<CategoriaConvenio, string> = {
   gas: 'Gas',
   funeraria: 'Funeraria',
   educacion: 'Educación',
+  asesoria: 'Asesoría',
   recreacion: 'Recreación',
   comercio: 'Comercio',
 };
@@ -51,11 +53,8 @@ export const convenioSchema = z.object({
   slug: z.string().min(1),
   nombre: z.string().min(1),
   categoria: categoriaConvenioSchema,
-  /**
-   * Opcional mientras AFUCH no entregue la clasificación (pendiente A2 del plan
-   * 2026-10-11): sin dato no se muestra etiqueta, para no atribuir a ciegas.
-   */
-  origen: origenConvenioSchema.optional(),
+  /** Clasificación entregada por AFUCH el 2026-10-15 (pendiente A2 del plan 2026-10-11). */
+  origen: origenConvenioSchema,
   /** Una o dos líneas para la tarjeta del listado. */
   resumen: z.string().min(1),
   /** Párrafo de contexto para la ficha. */

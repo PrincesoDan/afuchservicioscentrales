@@ -74,6 +74,16 @@ export default function PaginaQuienesSomos() {
               </div>
 
               <h2 className="mt-14 text-3xl font-bold tracking-tight text-balance text-navy-900">
+                Misión
+              </h2>
+              <p className="mt-6 text-base/8 text-slate-700">{ASOCIACION.mision}</p>
+
+              <h2 className="mt-14 text-3xl font-bold tracking-tight text-balance text-navy-900">
+                Visión
+              </h2>
+              <p className="mt-6 text-base/8 text-slate-700">{ASOCIACION.vision}</p>
+
+              <h2 className="mt-14 text-3xl font-bold tracking-tight text-balance text-navy-900">
                 Para qué existimos
               </h2>
               <p className="mt-6 text-base/8 text-slate-700">

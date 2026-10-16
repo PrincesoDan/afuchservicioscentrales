@@ -29,21 +29,33 @@ export type LecturaCorreos = {
   errores: string[];
 };
 
-type Columnas = { hoja: ExcelJS.Worksheet; filaEncabezado: number; rut: number; correo: number };
+type Columnas = {
+  hoja: ExcelJS.Worksheet;
+  filaEncabezado: number;
+  rut: number;
+  /**
+   * La lista «SOCIOS PAGINA WEB» (2026-10-15) trae el RUT sin dígito verificador
+   * y el DV en su propia columna: si existe, se juntan antes de validar.
+   */
+  dv: number;
+  correo: number;
+};
 
 function ubicarColumnas(libro: ExcelJS.Workbook): Columnas | null {
   for (const hoja of libro.worksheets) {
     for (let n = 1; n <= Math.min(FILAS_DE_ENCABEZADO, hoja.rowCount); n += 1) {
       let rut = 0;
+      let dv = 0;
       let correo = 0;
       hoja.getRow(n).eachCell((celda, columna) => {
         const encabezado = normalizarEncabezado(texto(valor(celda.value)))
           .normalize('NFD')
           .replace(/[̀-ͯ]/g, '');
         if (encabezado === 'RUT' && !rut) rut = columna;
+        if (encabezado === 'DV' && !dv) dv = columna;
         if (ENCABEZADOS_CORREO.includes(encabezado) && !correo) correo = columna;
       });
-      if (rut && correo) return { hoja, filaEncabezado: n, rut, correo };
+      if (rut && correo) return { hoja, filaEncabezado: n, rut, dv, correo };
     }
   }
   return null;
@@ -75,7 +87,9 @@ export async function leerListaCorreos(archivo: ArrayBuffer | Buffer): Promise<L
 
   for (let n = columnas.filaEncabezado + 1; n <= columnas.hoja.rowCount; n += 1) {
     const fila = columnas.hoja.getRow(n);
-    const rutCrudo = texto(valor(fila.getCell(columnas.rut).value));
+    const cuerpo = texto(valor(fila.getCell(columnas.rut).value));
+    const dv = columnas.dv ? texto(valor(fila.getCell(columnas.dv).value)) : '';
+    const rutCrudo = cuerpo && dv ? `${cuerpo}-${dv}` : cuerpo;
     const correoCrudo = texto(valor(fila.getCell(columnas.correo).value));
     if (!rutCrudo && !correoCrudo) continue;
     lectura.filasLeidas += 1;

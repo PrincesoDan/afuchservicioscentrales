@@ -2,12 +2,14 @@ import { convenioSchema, type Convenio } from '@afuch/contracts';
 import { z } from 'zod';
 
 /**
- * Catálogo inicial, transcrito desde `info/BENEFICIOS AFUCH.pdf` y las piezas
- * gráficas de convenios entregadas por AFUCH.
+ * Catálogo transcrito desde `info/BENEFICIOS AFUCH.pdf`, `info/BENEFICIOS FENAFUCH.pdf`
+ * y las piezas gráficas de convenios entregadas por AFUCH.
  *
- * `origen: 'afuch-sc'` marca los convenios cuyos descuentos hace AFUCH Servicios
- * Centrales según el detalle del 2026-10-11. El resto queda sin origen hasta que
- * AFUCH confirme cuáles son de FENAFUCH.
+ * `origen` sigue la clasificación que AFUCH envió el 2026-10-15: Coopeuch, FALP y
+ * el Fondo Solidario (con los vales de gas) son de AFUCH Servicios Centrales; las
+ * ópticas, la asesoría previsional, Dimeiggs y la funeraria son de FENAFUCH. La
+ * Clínica Dental Alto Valle y la Caja de Ahorros no estaban en esa lista y se
+ * marcan como FENAFUCH porque así aparecen en `BENEFICIOS FENAFUCH.pdf`.
  *
  * Los montos provienen de documentos de septiembre de 2026 y deben confirmarse
  * con AFUCH antes de publicar en producción.
@@ -25,7 +27,7 @@ const convenios: Convenio[] = [
     beneficios: [
       'Asesoría legal gratuita en causas laborales',
       'Nueve bonos de ayuda directa, entregados por una sola vez y sin devolución',
-      'Bono de invierno anual, sujeto a disponibilidad de fondos',
+      'Bono de invierno anual, en julio, sujeto a disponibilidad de fondos',
     ],
     formaDeAcceso:
       'La incorporación es voluntaria y se solicita directamente en AFUCH Servicios Centrales. Todos los bonos se cobran acreditando la situación con los certificados correspondientes.',
@@ -61,7 +63,8 @@ const convenios: Convenio[] = [
       'Precio más bajo que el de una recarga',
       'Hasta 3 vales mensuales por socio: dos de una misma carga y uno de carga distinta',
     ],
-    formaDeAcceso: 'Solicita tus vales en AFUCH Servicios Centrales.',
+    formaDeAcceso:
+      'Solicita tus vales con el formulario de gas disponible en el área de socios del sitio.',
     formaDePago: 'Una cuota descontada por planilla al mes siguiente',
     extensivoGrupoFamiliar: false,
     destacado: true,
@@ -135,6 +138,7 @@ const convenios: Convenio[] = [
   },
   {
     slug: 'caja-ahorros-empleados-publicos',
+    origen: 'fenafuch',
     nombre: 'Caja de Ahorros de Empleados Públicos',
     categoria: 'ahorro-credito',
     resumen:
@@ -155,6 +159,7 @@ const convenios: Convenio[] = [
   },
   {
     slug: 'optica-bethel',
+    origen: 'fenafuch',
     nombre: 'Óptica Bethel',
     categoria: 'salud',
     resumen:
@@ -175,6 +180,7 @@ const convenios: Convenio[] = [
   },
   {
     slug: 'optica-mugello',
+    origen: 'fenafuch',
     nombre: 'Óptica Mugello',
     categoria: 'salud',
     resumen:
@@ -194,6 +200,7 @@ const convenios: Convenio[] = [
   },
   {
     slug: 'clinica-dental-alto-valle',
+    origen: 'fenafuch',
     nombre: 'Clínica Dental Alto Valle',
     categoria: 'salud',
     resumen:
@@ -210,6 +217,7 @@ const convenios: Convenio[] = [
   },
   {
     slug: 'funeraria-juan-antonio-solar',
+    origen: 'fenafuch',
     nombre: 'Funeraria Juan Antonio Solar',
     categoria: 'funeraria',
     resumen:
@@ -229,6 +237,7 @@ const convenios: Convenio[] = [
   },
   {
     slug: 'libreria-dimeiggs',
+    origen: 'fenafuch',
     nombre: 'Librería Dimeiggs',
     categoria: 'educacion',
     resumen: '20% de descuento en compras presenciales y online, con cupón solicitado en AFUCH.',
@@ -236,7 +245,25 @@ const convenios: Convenio[] = [
       'Descuento en librería y artículos escolares, aplicable tanto en tienda como en el sitio web. Requiere solicitar previamente el cupón de descuento.',
     beneficios: ['20% de descuento en compras presenciales y online'],
     formaDeAcceso:
-      'Debes solicitar el cupón de descuento directamente en AFUCH Servicios Centrales antes de comprar.',
+      'Debes solicitar el cupón de descuento directamente a FENAFUCH o a AFUCH Servicios Centrales antes de comprar.',
+    extensivoGrupoFamiliar: false,
+    destacado: false,
+    vigencia: 'permanente',
+  },
+  {
+    slug: 'asesoria-previsional',
+    origen: 'fenafuch',
+    nombre: 'Asesoría previsional',
+    categoria: 'asesoria',
+    resumen: 'Orientación para jubilar con el consultor previsional Joel Marín L., de Confuturo.',
+    descripcion:
+      'Convenio de FENAFUCH con el consultor previsional Joel Marín L., de Confuturo, para resolver dudas y acompañar el proceso de jubilación.',
+    beneficios: [
+      'Asesoría de jubilación',
+      'Jubilaciones anticipadas',
+      'Jubilación por enfermedad o discapacidad',
+    ],
+    formaDeAcceso: 'Contacta a AFUCH Servicios Centrales para coordinar la asesoría.',
     extensivoGrupoFamiliar: false,
     destacado: false,
     vigencia: 'permanente',

@@ -1,20 +1,27 @@
-import { CATEGORIAS_CONVENIO, type CategoriaConvenio, type Convenio } from '@afuch/contracts';
+import {
+  CATEGORIAS_CONVENIO,
+  type CategoriaConvenio,
+  type Convenio,
+  type OrigenConvenio,
+} from '@afuch/contracts';
 import { normalizar } from './texto';
 
 export type FiltrosConvenio = {
   categoria?: CategoriaConvenio;
+  origen?: OrigenConvenio;
   busqueda?: string;
   soloGrupoFamiliar?: boolean;
 };
 
 export function filtrarConvenios(
   convenios: readonly Convenio[],
-  { categoria, busqueda, soloGrupoFamiliar }: FiltrosConvenio,
+  { categoria, origen, busqueda, soloGrupoFamiliar }: FiltrosConvenio,
 ): Convenio[] {
   const termino = busqueda ? normalizar(busqueda) : '';
 
   return convenios.filter((convenio) => {
     if (categoria && convenio.categoria !== categoria) return false;
+    if (origen && convenio.origen !== origen) return false;
     if (soloGrupoFamiliar && !convenio.extensivoGrupoFamiliar) return false;
     if (!termino) return true;
 

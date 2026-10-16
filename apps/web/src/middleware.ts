@@ -23,6 +23,7 @@ export const config = {
     '/socios/descuentos/:path*',
     '/socios/rendicion/:path*',
     '/socios/datos/:path*',
+    '/socios/gas/:path*',
     '/api/socios/:path*',
     '/admin',
     '/admin/((?!ingreso).*)',

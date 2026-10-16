@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { FormularioContacto } from '@/components/formulario-contacto';
 import { Container } from '@/components/ui/container';
-import { SEDE } from '@/content/sede';
+import { BotonLink } from '@/components/ui/button';
+import { DATOS_BANCARIOS, FORMULARIOS, SEDE } from '@/content/sede';
 
 export const metadata: Metadata = {
   title: 'Contacto',
@@ -58,6 +59,77 @@ export default function PaginaContacto() {
                     </a>
                   </p>
                 </address>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-navy-50 p-6">
+                <h2 className="text-lg font-bold text-navy-900">¿Quieres afiliarte?</h2>
+                <p className="mt-2 text-sm/6 text-slate-600">
+                  Completa el formulario de afiliación y AFUCH Servicios Centrales se pondrá en
+                  contacto contigo.
+                </p>
+                <BotonLink
+                  href={FORMULARIOS.afiliacion}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-5 w-full"
+                >
+                  Formulario de afiliación
+                </BotonLink>
+                <p className="mt-3 text-xs/5 text-slate-500">
+                  Se abre en una pestaña nueva (Formularios de Google).
+                </p>
+                <p className="mt-4 text-sm/6 text-slate-600">
+                  ¿Prefieres hacerlo en papel?{' '}
+                  <a
+                    href={SEDE.formularioIngresoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-navy-600 underline underline-offset-2 hover:text-navy-800"
+                  >
+                    Descarga el formulario de ingreso (PDF)
+                  </a>{' '}
+                  y envíalo con tu última liquidación de sueldo a{' '}
+                  <a href={`mailto:${SEDE.email}`} className="font-semibold text-navy-600">
+                    {SEDE.email}
+                  </a>
+                  .
+                </p>
+              </div>
+
+              {FORMULARIOS.opinion ? (
+                <div className="rounded-xl border border-slate-200 p-6">
+                  <h2 className="text-lg font-bold text-navy-900">Danos tu opinión</h2>
+                  <BotonLink
+                    href={FORMULARIOS.opinion}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variante="secundario"
+                    className="mt-5 w-full"
+                  >
+                    Responder el formulario
+                  </BotonLink>
+                  <p className="mt-3 text-xs/5 text-slate-500">
+                    Se abre en una pestaña nueva (Formularios de Google).
+                  </p>
+                </div>
+              ) : null}
+
+              <div className="rounded-xl border border-slate-200 p-6">
+                <h2 className="eyebrow mb-4 text-navy-600">Datos para transferencias</h2>
+                <dl className="space-y-2 text-sm/6 text-slate-700">
+                  {[
+                    ['Titular', DATOS_BANCARIOS.titular],
+                    ['RUT', DATOS_BANCARIOS.rut],
+                    ['Banco', DATOS_BANCARIOS.banco],
+                    ['Tipo de cuenta', DATOS_BANCARIOS.tipoCuenta],
+                    ['N° de cuenta', DATOS_BANCARIOS.numeroCuenta],
+                  ].map(([etiqueta, dato]) => (
+                    <div key={etiqueta} className="flex justify-between gap-4">
+                      <dt className="text-slate-500">{etiqueta}</dt>
+                      <dd className="font-semibold text-navy-900 tabular-nums">{dato}</dd>
+                    </div>
+                  ))}
+                </dl>
               </div>
             </aside>
           </div>

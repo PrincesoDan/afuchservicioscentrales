@@ -22,7 +22,7 @@ const esquema = z.object({
   /** Solo desarrollo: carpeta donde se guardan los correos en vez de enviarlos. */
   CORREO_BUZON_DIR: z.string().optional(),
   CORREO_REMITENTE: z.string().default('AFUCH Servicios Centrales <contacto@afuchscen.cl>'),
-  CORREO_CONTACTO_DESTINO: z.string().email().default('contacto@afuchscen.cl'),
+  CORREO_CONTACTO_DESTINO: z.string().email().default('afuchscen@gmail.com'),
   /** Carpeta persistente (volumen Docker) para los documentos de rendición. */
   STORAGE_DIR: z.string().default('./storage'),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),

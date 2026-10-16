@@ -15,7 +15,7 @@ export type Correo = {
 let cliente: Resend | undefined;
 
 export async function enviarCorreo(correo: Correo): Promise<void> {
-  const { RESEND_API_KEY, CORREO_REMITENTE } = env();
+  const { RESEND_API_KEY, CORREO_REMITENTE, CORREO_CONTACTO_DESTINO } = env();
 
   if (!RESEND_API_KEY) {
     // Solo desarrollo y tests: env() exige la clave en producción. Con
@@ -39,7 +39,8 @@ export async function enviarCorreo(correo: Correo): Promise<void> {
     subject: correo.asunto,
     text: correo.texto,
     html: correo.html,
-    replyTo: correo.responderA,
+    // El remitente es del dominio, pero AFUCH lee su correo de Gmail: las respuestas van ahí.
+    replyTo: correo.responderA ?? CORREO_CONTACTO_DESTINO,
   });
   if (error) throw new Error(`Resend rechazó el correo: ${error.message}`);
 }

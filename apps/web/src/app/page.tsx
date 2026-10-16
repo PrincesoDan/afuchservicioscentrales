@@ -7,7 +7,7 @@ import { Container } from '@/components/ui/container';
 import { EncabezadoSeccion } from '@/components/ui/encabezado-seccion';
 import { CONVENIOS } from '@/content/convenios';
 import { NOTICIAS } from '@/content/noticias';
-import { FENAFUCH } from '@/content/sede';
+import { FENAFUCH, FORMULARIOS } from '@/content/sede';
 import { formatearClp } from '@/lib/convenios';
 
 const destacados = CONVENIOS.filter((convenio) => convenio.destacado);
@@ -53,7 +53,12 @@ export default function PaginaInicio() {
                 <BotonLink href="/beneficios" variante="sobreOscuro">
                   Ver convenios y beneficios
                 </BotonLink>
-                <BotonLink href="/contacto" variante="fantasma">
+                <BotonLink
+                  href={FORMULARIOS.afiliacion}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variante="fantasma"
+                >
                   Quiero afiliarme
                 </BotonLink>
               </div>
@@ -200,7 +205,9 @@ export default function PaginaInicio() {
               el respaldo de una organización que negocia en nombre de todas y todos.
             </p>
             <div className="mt-9 flex flex-wrap justify-center gap-3">
-              <BotonLink href="/contacto">Quiero afiliarme</BotonLink>
+              <BotonLink href={FORMULARIOS.afiliacion} target="_blank" rel="noopener noreferrer">
+                Quiero afiliarme
+              </BotonLink>
               <Link
                 href="/quienes-somos"
                 className="inline-flex items-center px-5 py-3 text-sm font-semibold text-navy-800 underline underline-offset-4 hover:text-navy-600"

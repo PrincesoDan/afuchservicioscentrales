@@ -12,6 +12,7 @@ const ESTILOS: Record<CategoriaConvenio, string> = {
   gas: 'bg-cat-gas-bg text-cat-gas-fg',
   funeraria: 'bg-cat-funeraria-bg text-cat-funeraria-fg',
   educacion: 'bg-cat-educacion-bg text-cat-educacion-fg',
+  asesoria: 'bg-cat-asesoria-bg text-cat-asesoria-fg',
   recreacion: 'bg-cat-recreacion-bg text-cat-recreacion-fg',
   comercio: 'bg-cat-comercio-bg text-cat-comercio-fg',
 };

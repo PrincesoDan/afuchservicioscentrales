@@ -10,6 +10,7 @@ import {
 function convenio(parcial: Partial<Convenio> & Pick<Convenio, 'slug'>): Convenio {
   return {
     nombre: 'Convenio de prueba',
+    origen: 'afuch-sc',
     categoria: 'salud',
     resumen: 'Resumen de prueba',
     descripcion: 'Descripción de prueba',
@@ -26,6 +27,7 @@ const catalogo: Convenio[] = [
   convenio({
     slug: 'optica',
     nombre: 'Óptica Bethel',
+    origen: 'fenafuch',
     categoria: 'salud',
     extensivoGrupoFamiliar: true,
   }),
@@ -69,6 +71,13 @@ describe('filtrarConvenios', () => {
   it('filtra por cobertura de grupo familiar', () => {
     const resultado = filtrarConvenios(catalogo, { soloGrupoFamiliar: true });
     expect(resultado.map((c) => c.slug)).toEqual(['optica', 'fondo']);
+  });
+
+  it('filtra por origen', () => {
+    expect(filtrarConvenios(catalogo, { origen: 'fenafuch' }).map((c) => c.slug)).toEqual([
+      'optica',
+    ]);
+    expect(filtrarConvenios(catalogo, { origen: 'afuch-sc' })).toHaveLength(2);
   });
 
   it('combina categoría y búsqueda', () => {

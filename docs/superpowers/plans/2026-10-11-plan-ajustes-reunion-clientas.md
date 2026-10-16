@@ -25,10 +25,10 @@ de cuentas que cuidar.
 
 | #   | Qué falta                                                             | Bloquea       |
 | --- | --------------------------------------------------------------------- | ------------- |
-| A1  | Teléfono y dirección nuevos                                           | Tarea C2      |
-| A2  | Listado de convenios: cuáles son de AFUCH SC y cuáles de FENAFUCH     | Tarea C5      |
+| A1  | ~~Teléfono y dirección nuevos~~ (llegó el 2026-10-15)                 | Tarea C2      |
+| A2  | ~~Convenios AFUCH SC / FENAFUCH~~ (llegó el 2026-10-15)               | Tarea C5      |
 | A3  | Fotografías de la directiva (y nómina con nombres y cargos)           | Tarea C6      |
-| A4  | Excel de correos revisado (`info/socios-afuch-nombre-rut-mail.xlsx`)  | Carga inicial |
+| A4  | Excel de correos: llegó `info/SOCIOS PAGINA WEB AFUCHSCEN.xlsx` (2026-10-15); 8 filas con RUT o correo inválido | Carga inicial |
 | A5  | API key de Resend y dominio `afuchscen.cl` verificado en Resend (DNS) | Producción    |
 
 Preguntas abiertas para AFUCH:
@@ -37,6 +37,11 @@ Preguntas abiertas para AFUCH:
   mantiene? (Lo que se pidió eliminar es el concepto de descuento «Reintegro bono de invierno»;
   son cosas distintas y por ahora no se toca el texto del beneficio.)
 - **P8.** ¿Se enlaza al sitio de FENAFUCH? Si sí, ¿cuál es la URL oficial?
+
+Respondido por AFUCH el 2026-10-15: P7 → el bono de invierno se mantiene (anual, en julio).
+Llegaron también misión, visión, formularios de Google (afiliación y vales de gas; el de gas
+solo en el área de socios) y queda pendiente el formulario «Danos tu opinión»
+(`FORMULARIOS.opinion` en `content/sede.ts`; sin URL la sección no se muestra).
 
 ## 3. Parte B — Registro e ingreso por correo
 
@@ -107,7 +112,7 @@ Carga de correos (admin y CLI, misma lógica en `server/correos-socios.ts`):
 - [x] **C1. FENAFUCH (D13)**: constante en `content/` con el texto aprobado; se muestra en la
       portada (bloque propio), en la página de convenios (encabezado) y en el pie. Sin enlace
       externo hasta resolver P8.
-- [ ] **C2. Teléfono y dirección** _(espera A1)_: cambiar `SEDE.telefono` y `SEDE.direccion`
+- [x] **C2. Teléfono y dirección** _(2026-10-15; además jornada de atención y datos bancarios)_: cambiar `SEDE.telefono` y `SEDE.direccion`
       en `content/sede.ts`; revisar JSON-LD y mapa si corresponde.
 - [x] **C3. Quitar horarios**: eliminar `SEDE.horarios` y sus usos en `site-footer.tsx`,
       `contacto/page.tsx` y el JSON-LD de `layout.tsx`; ajustar `publico.spec.ts`.
@@ -116,7 +121,7 @@ Carga de correos (admin y CLI, misma lógica en `server/correos-socios.ts`):
       «Mis descuentos» de que el total puede no incluir todos los descuentos de la liquidación.
       La importación, el admin y la exportación de datos del socio **no cambian** (el dato se
       conserva completo). Tests.
-- [ ] **C5. Convenios por origen** _(espera A2; el campo opcional y la etiqueta ya están)_: campo `origen: 'afuch-sc' | 'fenafuch'` en
+- [x] **C5. Convenios por origen** _(2026-10-15: `origen` obligatorio, filtro por origen en el catálogo y nuevo convenio de asesoría previsional)_: campo `origen: 'afuch-sc' | 'fenafuch'` en
       `convenioSchema`; la página agrupa y etiqueta por origen. Se implementa cuando llegue el
       listado, para no clasificar a ciegas.
 - [ ] **C6. Fotos de la directiva** _(espera A3; el campo `foto` y el respaldo con iniciales ya están)_: `foto?: { src; alt }` en

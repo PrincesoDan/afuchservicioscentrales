@@ -1,4 +1,4 @@
-import { CATEGORIAS_CONVENIO } from '@afuch/contracts';
+import { CATEGORIAS_CONVENIO, ORIGENES_CONVENIO } from '@afuch/contracts';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -44,6 +44,9 @@ export default async function PaginaConvenio({ params }: Props) {
 
           <div className="flex flex-wrap items-center gap-2">
             <ChipCategoria categoria={convenio.categoria} />
+            <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-xs font-medium text-navy-800">
+              Convenio {ORIGENES_CONVENIO[convenio.origen]}
+            </span>
             {convenio.extensivoGrupoFamiliar ? (
               <span className="inline-flex items-center rounded-full border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-600">
                 Extensivo al grupo familiar

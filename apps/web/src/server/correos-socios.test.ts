@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { formatearRut } from '@afuch/contracts';
 import { db } from '@afuch/db';
+import ExcelJS from 'exceljs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { limpiarBase } from '@/test/base';
 import { buzon, tokenDelUltimoCorreo } from '@/test/correos';
@@ -64,6 +65,21 @@ describe('leerListaCorreos', () => {
     );
     expect(lectura.errores).toEqual([]);
     expect(lectura.filas).toHaveLength(1);
+  });
+
+  it('junta el RUT con la columna DV cuando el dígito verificador viene aparte', async () => {
+    const libro = new ExcelJS.Workbook();
+    const hoja = libro.addWorksheet('Hoja1');
+    hoja.addRow(['RUTDV', 'RUT', 'DV', 'NOMBRE', 'CORREO']);
+    for (const [rut, correo] of [
+      [UNO, 'uno@uchile.cl'],
+      [DOS, 'dos@uchile.cl'],
+    ] as const) {
+      hoja.addRow([Number(rut), Number(rut.slice(0, -1)), rut.slice(-1), 'PRUEBA', correo]);
+    }
+    const lectura = await leerListaCorreos(Buffer.from(await libro.xlsx.writeBuffer()));
+    expect(lectura.errores).toEqual([]);
+    expect(lectura.filas.map((f) => f.rut)).toEqual([UNO, DOS]);
   });
 
   it('informa los errores por número de fila, sin datos personales', async () => {

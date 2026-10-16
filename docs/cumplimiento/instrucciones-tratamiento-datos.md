@@ -76,7 +76,7 @@ Todo cambio de subencargado se informa previamente a AFUCH.
 ## 8. Derechos de los titulares
 
 Las solicitudes de acceso, rectificación, supresión, oposición y portabilidad se reciben en
-`contacto@afuchscen.cl`. La Palanca asiste a AFUCH según
+`afuchscen@gmail.com`. La Palanca asiste a AFUCH según
 `docs/cumplimiento/procedimientos.md` §1, dentro del plazo legal.
 
 ## 9. Incidentes de seguridad

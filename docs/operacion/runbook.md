@@ -132,7 +132,8 @@ de filas a AFUCH para que corrija la planilla.
 **Correos de socios.** El socio se registra e ingresa con el correo que AFUCH tiene
 registrado; sin correo cargado no puede crear su cuenta.
 
-- Lista completa (Excel validado por AFUCH con columnas `RUT` y `Mail`): `/admin/correos`, o
+- Lista completa (Excel validado por AFUCH con columnas `RUT` y `Mail`/`Correo`; si el DV viene
+  en su propia columna `DV`, se junta con el RUT): `/admin/correos`, o
   `dc run --rm herramientas pnpm cli correos:importar /entrada/correos.xlsx` (vista previa) y
   luego con `--confirmar`. Borrar el archivo después (`shred -u`). Los RUT que no son socios
   se omiten: importar primero la planilla del mes.
