@@ -66,7 +66,7 @@ cp infra/.env.example infra/.env && chmod 600 infra/.env
 cifrados y los respaldos son irrecuperables.
 
 ```bash
-dc build
+dc --profile herramientas build   # sin --profile, compose omite la imagen de la CLI
 dc run --rm herramientas pnpm --filter @afuch/db migrate:deploy
 dc up -d
 dc run --rm herramientas pnpm cli admin:crear persona@lapalanca.cl
@@ -152,7 +152,7 @@ vuelve a registrarse; las sesiones de la cuenta anulada dejan de valer.
 
 ```bash
 cd /opt/afuch && git fetch && git checkout <tag-o-commit>
-dc build
+dc --profile herramientas build   # sin --profile, compose omite la imagen de la CLI
 dc run --rm herramientas pnpm --filter @afuch/db migrate:deploy
 dc up -d
 ```
