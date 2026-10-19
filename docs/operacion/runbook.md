@@ -150,16 +150,20 @@ vuelve a registrarse; las sesiones de la cuenta anulada dejan de valer.
 
 ## 6. Actualizar la aplicación
 
+Un push a `main` no se publica solo: hay que desplegar en el VPS.
+
 ```bash
-cd /opt/afuch && git fetch && git checkout <tag-o-commit>
-dc --profile herramientas build   # sin --profile, compose omite la imagen de la CLI
-dc run --rm herramientas pnpm --filter @afuch/db migrate:deploy
-dc up -d
+/opt/afuch/infra/deploy.sh              # última versión de origin/main
+/opt/afuch/infra/deploy.sh <tag|sha>    # una versión puntual
 ```
 
-Antes de actualizar, ejecutar un respaldo manual (sección 7).
+El script hace, en orden: respaldo (sección 7), `git fetch` + avance de `main`,
+`dc --profile herramientas build` (sin `--profile`, compose omite la imagen de la CLI),
+migraciones, `dc up -d`, verificación de que `https://www.<DOMINIO>` responde y limpieza de
+imágenes viejas. Se detiene ante el primer error y se niega a correr si hay cambios sin commit
+en `/opt/afuch`. Al terminar imprime el commit anterior.
 
-**Rollback.** Volver al tag anterior y repetir `build` + `up -d`. Las migraciones solo
+**Rollback.** `/opt/afuch/infra/deploy.sh <commit-anterior>`. Las migraciones solo
 avanzan: si la versión nueva cambió el schema de forma incompatible, restaurar el respaldo
 tomado antes de actualizar (sección 8).
 
