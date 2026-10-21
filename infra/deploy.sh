@@ -16,7 +16,8 @@ exec 9>/tmp/afuch-deploy.lock
 flock -n 9 || { echo "Ya hay un despliegue en curso." >&2; exit 1; }
 
 cd "$RAIZ"
-set -a; source "$RAIZ/infra/.env"; set +a
+source "$RAIZ/infra/cargar-env.sh"
+cargar_env "$RAIZ/infra/.env"
 
 # Cambios locales sin commit en el VPS se perderían o romperían el pull.
 if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then

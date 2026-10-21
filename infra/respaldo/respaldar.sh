@@ -12,7 +12,8 @@ RETENCION_DIAS="${RETENCION_DIAS:-30}"
 RCLONE_DESTINO="${RCLONE_DESTINO:-}"                           # ej. "respaldo:afuch-respaldos"
 FECHA="$(date +%Y%m%d-%H%M%S)"
 
-set -a; source "$RAIZ/infra/.env"; set +a
+source "$RAIZ/infra/cargar-env.sh"
+cargar_env "$RAIZ/infra/.env"
 mkdir -p "$DESTINO_LOCAL"
 chmod 700 "$DESTINO_LOCAL"
 

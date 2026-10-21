@@ -10,7 +10,8 @@ CLAVE_RESPALDO="${CLAVE_RESPALDO:-/etc/afuch/clave-respaldo}"
 DB="${1:?Indica el archivo .dump.enc}"
 DOCS="${2:-}"
 
-set -a; source "$RAIZ/infra/.env"; set +a
+source "$RAIZ/infra/cargar-env.sh"
+cargar_env "$RAIZ/infra/.env"
 descifrar() { openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass "file:$CLAVE_RESPALDO" -in "$1"; }
 
 read -r -p "Se reemplazará la base '$POSTGRES_DB'. Escribe RESTAURAR para continuar: " respuesta
