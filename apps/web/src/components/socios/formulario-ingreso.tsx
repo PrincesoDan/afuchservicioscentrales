@@ -2,8 +2,10 @@
 
 import { ingresoSocioSchema } from '@afuch/contracts';
 import { signIn } from 'next-auth/react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
+import { SEDE } from '@/content/sede';
 import { Boton } from '../ui/button';
 import { CLASES_CAMPO, Campo } from '../ui/campo';
 import { Aviso } from './tarjeta-acceso';
@@ -61,8 +63,28 @@ export function FormularioIngreso() {
       </Campo>
       {fallo ? (
         <Aviso tipo="error">
-          Correo o contraseña incorrectos. Tras varios intentos fallidos la cuenta se bloquea 15
-          minutos.
+          Correo o contraseña incorrectos. Revisa que:
+          <span className="mt-2 block">
+            • ya hayas{' '}
+            <Link href="/socios/registro" className="font-semibold underline">
+              creado tu cuenta
+            </Link>{' '}
+            y confirmado el mensaje que te enviamos;
+          </span>
+          <span className="block">
+            • uses el correo que AFUCH tiene registrado para ti (no otro correo tuyo).
+          </span>
+          <span className="mt-2 block">
+            Si no recuerdas tu contraseña,{' '}
+            <Link href="/socios/recuperar" className="font-semibold underline">
+              restablécela
+            </Link>
+            . Si no sabes qué correo tiene AFUCH, escríbenos a{' '}
+            <a href={`mailto:${SEDE.email}`} className="font-semibold underline">
+              {SEDE.email}
+            </a>
+            . Tras varios intentos fallidos la cuenta se bloquea 15 minutos.
+          </span>
         </Aviso>
       ) : null}
       <Boton type="submit" disabled={enviando} className="w-full">

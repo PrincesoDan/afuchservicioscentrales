@@ -92,4 +92,19 @@ test('contraseña incorrecta no ingresa', async ({ page }) => {
   await page.getByLabel('Contraseña').fill('incorrecta-larga');
   await page.getByRole('button', { name: 'Ingresar' }).click();
   await expect(page.getByText('Correo o contraseña incorrectos.', { exact: false })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'creado tu cuenta' })).toHaveAttribute(
+    'href',
+    '/socios/registro',
+  );
+  await expect(page.getByRole('link', { name: 'restablécela' })).toHaveAttribute(
+    'href',
+    '/socios/recuperar',
+  );
+});
+
+test('el ingreso explica los pasos de la primera vez', async ({ page }) => {
+  await page.goto('/socios');
+  await expect(page.getByRole('heading', { name: /primera vez/ })).toBeVisible();
+  await page.getByRole('link', { name: 'Crea tu cuenta' }).click();
+  await expect(page).toHaveURL('/socios/registro');
 });

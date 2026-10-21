@@ -33,3 +33,6 @@ temp/
 
 # Salida generada por graphify (puede indexar info/, incluida la planilla)
 graphify-out/
+
+# Bitácora local de soporte y diagnóstico (puede mencionar casos de socios): nunca al repo
+support/

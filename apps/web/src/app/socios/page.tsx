@@ -21,18 +21,33 @@ export default async function PaginaIngresoSocios({ searchParams }: Props) {
   return (
     <TarjetaAcceso
       titulo="Ingresa con tu correo"
-      descripcion="Revisa tus descuentos por planilla y la rendición de cuentas de la asociación."
+      descripcion={
+        <>
+          <p>Revisa tus descuentos por planilla y la rendición de cuentas de la asociación.</p>
+          {/* En soporte (oct. 2026) la mayoría de los fallos fueron personas que intentaban
+              ingresar sin haber creado su cuenta, o con un correo distinto al precargado. */}
+          <div className="mt-4 rounded-md border border-navy-200 bg-navy-50 p-4 text-navy-900">
+            <h2 className="font-semibold">¿Es tu primera vez? Antes de ingresar:</h2>
+            <ol className="mt-2 list-decimal space-y-1 pl-5">
+              <li>
+                <Link
+                  href="/socios/registro"
+                  className="font-semibold text-navy-600 underline hover:text-navy-800"
+                >
+                  Crea tu cuenta
+                </Link>{' '}
+                con el correo que AFUCH tiene registrado para ti.
+              </li>
+              <li>
+                Abre el mensaje que te enviaremos (revisa también spam) y define tu contraseña.
+              </li>
+              <li>Vuelve aquí e ingresa con ese mismo correo y tu contraseña.</li>
+            </ol>
+          </div>
+        </>
+      }
       pie={
         <div className="space-y-2">
-          <p>
-            ¿Primera vez?{' '}
-            <Link
-              href="/socios/registro"
-              className="font-semibold text-navy-600 hover:text-navy-800"
-            >
-              Crea tu cuenta
-            </Link>
-          </p>
           <p>
             <Link
               href="/socios/recuperar"
