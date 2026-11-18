@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { DetalleDescuento } from '@/components/socios/detalle-descuento';
 import { CUOTAS } from '@/content/asociacion';
 import { formatearClp } from '@/lib/convenios';
 import { nombrePeriodo } from '@/lib/periodos';
@@ -61,16 +62,7 @@ export default async function PaginaDescuentos({ searchParams }: Props) {
                 <tr key={linea.concepto}>
                   <th scope="row" className="px-5 py-4 font-medium text-slate-800">
                     {linea.nombre}
-                    {linea.detalle?.tipo === 'cuotasAntiguas' && linea.detalle.cuotas.length > 0 ? (
-                      <span className="mt-1 block text-xs font-normal text-slate-500">
-                        {linea.detalle.cuotas
-                          .map(
-                            (c, i, cuotas) =>
-                              `${cuotas.length > 1 ? `Préstamo ${i + 1}: ` : ''}cuota ${c.cuota} de ${c.total}`,
-                          )
-                          .join(' · ')}
-                      </span>
-                    ) : null}
+                    {linea.detalle ? <DetalleDescuento detalle={linea.detalle} /> : null}
                   </th>
                   <td className="px-5 py-4 text-right tabular-nums text-slate-800">
                     {formatearClp(linea.monto)}

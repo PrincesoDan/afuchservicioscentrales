@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { formatearClp } from './convenios';
 
 /**
  * Desglose de una línea de descuento, guardado en `LineaDescuento.detalle` (JSON).
@@ -51,4 +52,48 @@ export function interpretarDetalle(valor: unknown): DetalleInterpretado | null {
   if (antiguo.success) return { tipo: 'cuotasAntiguas', cuotas: antiguo.data };
   const nuevo = detalleDescuentoSchema.safeParse(valor);
   return nuevo.success ? nuevo.data : null;
+}
+
+type Reparto = readonly { destino: string; parte: string }[];
+
+function fechaLegible(fecha: string): string {
+  const [anio, mes, dia] = fecha.split('-');
+  return `${dia}-${mes}-${anio}`;
+}
+
+function textoPrestamo(p: PrestamoDetalle): string {
+  const origen = p.fecha ? `Préstamo del ${fechaLegible(p.fecha)}` : 'Préstamo';
+  const cuota =
+    p.cuota !== null && p.totalCuotas !== null ? `cuota ${p.cuota} de ${p.totalCuotas}, ` : '';
+  return `${origen} por ${formatearClp(p.montoPrestado)}: ${cuota}${formatearClp(p.montoCuota)}`;
+}
+
+/** Textos que se muestran bajo el concepto en «Mis descuentos», uno por renglón. */
+export function lineasDeDetalle(detalle: DetalleInterpretado, reparto: Reparto): string[] {
+  switch (detalle.tipo) {
+    case 'cuotaSocial': {
+      const [afuchscen, fenafuch] = reparto;
+      return [
+        `${afuchscen?.destino} (${afuchscen?.parte}) ${formatearClp(detalle.afuchscen)} · ${fenafuch?.destino} (${fenafuch?.parte}) ${formatearClp(detalle.fenafuch)}`,
+      ];
+    }
+    case 'prestamosAfuch':
+      return detalle.prestamos.map(textoPrestamo);
+    case 'gas': {
+      const tipos = detalle.porTipo
+        .map((t) => `${t.kilos} kg: ${formatearClp(t.monto)}`)
+        .join(' · ');
+      if (detalle.vales === null) return [tipos];
+      return [`${tipos} (${detalle.vales} ${detalle.vales === 1 ? 'vale' : 'vales'} en total)`];
+    }
+    case 'cuotasAntiguas':
+      return [
+        detalle.cuotas
+          .map(
+            (c, i) =>
+              `${detalle.cuotas.length > 1 ? `Préstamo ${i + 1}: ` : ''}cuota ${c.cuota} de ${c.total}`,
+          )
+          .join(' · '),
+      ];
+  }
 }

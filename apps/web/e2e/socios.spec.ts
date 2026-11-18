@@ -35,9 +35,13 @@ test('registro, verificación, ingreso y consulta', async ({ page }) => {
   const tabla = page.getByRole('table');
   await expect(tabla.getByRole('rowheader', { name: /Vales de gas Abastible/ })).toBeVisible();
   await expect(
-    tabla.getByText('Préstamo 1: cuota 1 de 3 · Préstamo 2: cuota 2 de 3'),
+    tabla.getByText('AFUCH Servicios Centrales (60%) $2.558 · FENAFUCH (40%) $1.705'),
   ).toBeVisible();
-  await expect(tabla.getByRole('row', { name: /Total del mes/ })).toContainText('$75.249');
+  await expect(
+    tabla.getByText('Préstamo del 12-07-2026 por $60.000: cuota 1 de 3, $20.000'),
+  ).toBeVisible();
+  await expect(tabla.getByText('11 kg: $19.197 · 15 kg: $23.909 (2 vales en total)')).toBeVisible();
+  await expect(tabla.getByRole('row', { name: /Total del mes/ })).toContainText('$94.163');
   await expect(tabla.getByText(/Go Optic|bono de invierno/i)).toHaveCount(0);
 
   // El admin publicó este documento en admin.spec.ts (se ejecuta antes).
