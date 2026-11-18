@@ -303,8 +303,25 @@ export async function leerPlanilla(archivo: ArrayBuffer | Buffer): Promise<Resul
     };
     porRut.set(rut, { fila: numeroFila, socio });
 
+    // El gas por tipo se compara siempre: la planilla real trae filas con vales
+    // por tipo y el total de gas vacío, y eso debe verse en la vista previa.
+    const gasPorTipo: { kilos: 5 | 11 | 15 | 45; monto: number }[] = [];
+    for (const [encabezadoGas, kilos] of GAS_POR_TIPO) {
+      const montoTipo = monto(col(encabezadoGas));
+      if (montoTipo) gasPorTipo.push({ kilos, monto: montoTipo });
+    }
+
     for (const [encabezado, concepto] of CONCEPTOS_FIJOS) {
       const montoConcepto = monto(col(encabezado));
+
+      if (concepto === 'GAS_ABASTIBLE') {
+        const sumaTipos = gasPorTipo.reduce((a, t) => a + t.monto, 0);
+        if (montoConcepto !== null && sumaTipos !== montoConcepto) {
+          resultado.advertencias.push(
+            `Fila ${numeroFila}: los vales de gas por tipo (${sumaTipos}) no suman el total de gas (${montoConcepto}).`,
+          );
+        }
+      }
       if (!montoConcepto) continue;
       const linea: LineaLeida = { concepto, monto: montoConcepto };
 
@@ -317,21 +334,10 @@ export async function leerPlanilla(archivo: ArrayBuffer | Buffer): Promise<Resul
       }
 
       if (concepto === 'GAS_ABASTIBLE') {
-        const porTipo: { kilos: 5 | 11 | 15 | 45; monto: number }[] = [];
-        for (const [encabezadoGas, kilos] of GAS_POR_TIPO) {
-          const montoTipo = monto(col(encabezadoGas));
-          if (montoTipo) porTipo.push({ kilos, monto: montoTipo });
-        }
-        const sumaTipos = porTipo.reduce((a, t) => a + t.monto, 0);
-        if (sumaTipos !== montoConcepto) {
-          resultado.advertencias.push(
-            `Fila ${numeroFila}: los vales de gas por tipo (${sumaTipos}) no suman el total de gas (${montoConcepto}).`,
-          );
-        }
         const vales = numero(celda(col(VALES_GAS)));
         linea.detalle = {
           tipo: 'gas',
-          porTipo,
+          porTipo: gasPorTipo,
           vales: vales && vales > 0 ? Math.round(vales) : null,
         };
       }

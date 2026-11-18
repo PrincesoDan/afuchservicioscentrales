@@ -167,6 +167,10 @@ afuchservicioscentrales/
 
 ## 5. Formato de la planilla mensual (entrada del importador)
 
+> **Reemplazado (2026-11-18).** Desde octubre de 2026 AFUCH entrega otro formato y el importador
+> solo acepta ese: ver `docs/superpowers/specs/2026-11-18-planilla-nuevo-formato-design.md`. Esta
+> sección describe el formato antiguo, con el que se importaron agosto y septiembre de 2026.
+
 Archivo de referencia: `info/Planilla Afuch SC - AGOSTO 2026 OK(1).xlsx` (fuera de git).
 Tiene 12 hojas. **El importador lee solo `ASOCIACI`**, buscando las columnas por encabezado.
 

@@ -221,6 +221,16 @@ describe('leerPlanilla', () => {
     });
   });
 
+  it('advierte gas por tipo cuando el total de gas viene vacío', async () => {
+    const resultado = await leerPlanilla(
+      await crearPlanillaFicticia({ filas: [{ ...BASE, gas: { 15: 23909 }, totalGas: 0 }] }),
+    );
+    expect(resultado.advertencias).toEqual([
+      'Fila 3: los vales de gas por tipo (23909) no suman el total de gas (0).',
+    ]);
+    expect(resultado.socios[0]?.lineas).toEqual([]);
+  });
+
   it('excluye y advierte filas con DV inválido', async () => {
     const resultado = await leerPlanilla(
       await crearPlanillaFicticia({ filas: [{ ...BASE, dvForzado: '9' }] }),

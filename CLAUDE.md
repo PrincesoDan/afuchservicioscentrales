@@ -55,7 +55,10 @@ Monorepo pnpm + Turborepo. **Solo Next.js** (no hay API separada).
 - `packages/db` — `prisma/schema.prisma`, migraciones, `db()` (singleton con `@prisma/adapter-pg`).
   El cliente se genera en `src/generated/` (ignorado por git).
 - `apps/web/src/server/` — toda la lógica de servidor. Cada archivo importa `server-only`.
-  - `planilla.ts` lee la hoja `ASOCIACI` (puro, sin base) → `importacion.ts` la guarda.
+  - `planilla.ts` lee la «PLANILLA DESCUENTOS PAGINA WEB» (formato de AFUCH desde oct. 2026;
+    encabezados en la fila 2; ver `docs/superpowers/specs/2026-11-18-planilla-nuevo-formato-design.md`)
+    (puro, sin base) → `importacion.ts` la guarda. El desglose de cada línea va en el JSON
+    `LineaDescuento.detalle` (`lib/detalle-descuento.ts`), sin migración.
   - `cuentas.ts` registro/verificación/ingreso/recuperación de socios (por correo).
   - `correos-socios.ts` carga de los correos precargados (lista RUT + Mail, corrección individual).
   - `base-de-prueba.ts` socios ficticios con correos reales para revisión manual (`pnpm cli prueba:cargar`).
