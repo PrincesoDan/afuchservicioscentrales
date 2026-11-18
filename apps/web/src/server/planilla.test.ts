@@ -231,6 +231,37 @@ describe('leerPlanilla', () => {
     expect(resultado.socios[0]?.lineas).toEqual([]);
   });
 
+  it('calcula el 60/40 desde la cuota y advierte si la planilla no cuadra', async () => {
+    const resultado = await leerPlanilla(
+      await crearPlanillaFicticia({ filas: [{ ...BASE, cuotaSocial: 4263, cuota60Forzada: 0 }] }),
+    );
+    expect(resultado.socios[0]?.lineas[0]?.detalle).toEqual({
+      tipo: 'cuotaSocial',
+      afuchscen: 2558,
+      fenafuch: 1705,
+    });
+    expect(resultado.advertencias).toEqual([
+      'Fila 3: el reparto de la cuota social (60 %: 0 + 40 %: 1705) no suma la cuota (4263).',
+    ]);
+  });
+
+  it('usa la hoja visible si hay una copia oculta de otro mes', async () => {
+    const resultado = await leerPlanilla(
+      await crearPlanillaFicticia({ hojasPrevias: [{ mes: 9, oculta: true }] }),
+    );
+    expect(resultado.errores).toEqual([]);
+    expect(resultado.periodo).toEqual({ anio: 2026, mes: 8 });
+  });
+
+  it('bloquea si hay más de una hoja de descuentos visible', async () => {
+    const resultado = await leerPlanilla(
+      await crearPlanillaFicticia({ hojasPrevias: [{ mes: 9 }] }),
+    );
+    expect(resultado.errores).toEqual([
+      'El archivo tiene más de una hoja de descuentos (Consolidado_Septiembre_2026, Consolidado_Agosto_2026); deja solo la del mes que vas a subir.',
+    ]);
+  });
+
   it('excluye y advierte filas con DV inválido', async () => {
     const resultado = await leerPlanilla(
       await crearPlanillaFicticia({ filas: [{ ...BASE, dvForzado: '9' }] }),

@@ -276,10 +276,14 @@ a registrarse de nuevo. Decisiones D4′ y D10–D13: plan de ajustes del 2026-1
 
 ### Planilla mensual
 
-Se importa desde `/admin/planilla` o con el CLI. Se lee **solo la hoja `ASOCIACI`**, buscando
-columnas por encabezado. Reimportar un mes lo reemplaza. Importar **nunca deshabilita** socios.
+Se importa desde `/admin/planilla` o con el CLI. Desde octubre de 2026 el formato es la
+«PLANILLA DESCUENTOS PAGINA WEB» de AFUCH: una fila por socio, encabezados en la fila 2 y la hoja
+identificada por sus columnas (su nombre cambia cada mes). Un archivo con el formato antiguo
+(hoja `ASOCIACI`) se rechaza. Reimportar un mes lo reemplaza. Importar **nunca deshabilita** socios.
 Las filas con RUT de dígito verificador inválido se excluyen y se informan como advertencia.
-Formato completo y nombre visible de cada concepto: plan §3.2 y §5.
+El socio ve el desglose de la cuota social (60/40), de cada préstamo AFUCH y del gas por tipo.
+Formato y validaciones: `docs/superpowers/specs/2026-11-18-planilla-nuevo-formato-design.md`;
+nombre visible de cada concepto: plan de cierre §3.2.
 
 ### Administración
 

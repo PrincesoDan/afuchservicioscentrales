@@ -55,6 +55,8 @@ export type FilaFicticia = {
   prestamos?: PrestamoFicticio[];
   /** Por defecto, la suma de los conceptos. */
   totalForzado?: number;
+  /** Por defecto, el 60 % exacto de `cuotaSocial` (con decimales, como el real). */
+  cuota60Forzada?: number;
   /** Para probar errores: fuerza un DV distinto del correcto. */
   dvForzado?: string;
 };
@@ -167,35 +169,30 @@ function hojaAntigua(libro: ExcelJS.Workbook) {
   hoja.addRow(['PRUEBA ANTIGUA', 2026, 8, 11111111, rutFicticio('11111111').slice(-1), 0, 0, 0]);
 }
 
-export async function crearPlanillaFicticia({
-  filas = FILAS_EJEMPLO,
-  anio = 2026,
-  mes = 8,
-  nombreHoja,
-  bloquesPrestamo = BLOQUES_PRESTAMO,
-  omitirColumnas = [],
-  formatoAntiguo = false,
-}: {
-  filas?: FilaFicticia[];
-  anio?: number;
-  mes?: number;
-  nombreHoja?: string;
-  bloquesPrestamo?: readonly string[];
-  /** Encabezados a quitar, para probar errores de formato. */
-  omitirColumnas?: readonly string[];
-  formatoAntiguo?: boolean;
-} = {}): Promise<Buffer> {
-  const libro = new ExcelJS.Workbook();
-  // Hoja vecina: el lector debe ignorarla.
-  libro.addWorksheet('RENUNCIA').addRow(['RENUNCIAS']);
-  if (formatoAntiguo) {
-    hojaAntigua(libro);
-    return Buffer.from(await libro.xlsx.writeBuffer());
-  }
-
+function escribirHoja(
+  libro: ExcelJS.Workbook,
+  {
+    filas,
+    anio,
+    mes,
+    nombre,
+    bloquesPrestamo,
+    omitirColumnas,
+    oculta,
+  }: {
+    filas: FilaFicticia[];
+    anio: number;
+    mes: number;
+    nombre: string | undefined;
+    bloquesPrestamo: readonly string[];
+    omitirColumnas: readonly string[];
+    oculta: boolean;
+  },
+) {
   const nombreMes = MESES[mes - 1] ?? 'MES';
   const hoja = libro.addWorksheet(
-    nombreHoja ?? `Consolidado_${nombreMes.charAt(0)}${nombreMes.slice(1).toLowerCase()}_${anio}`,
+    nombre ?? `Consolidado_${nombreMes.charAt(0)}${nombreMes.slice(1).toLowerCase()}_${anio}`,
+    { state: oculta ? 'hidden' : 'visible' },
   );
   const encabezados = encabezadosPlanilla(mes, bloquesPrestamo).map((e) =>
     omitirColumnas.includes(e) ? 'OMITIDA' : e,
@@ -222,7 +219,7 @@ export async function crearPlanillaFicticia({
     poner('FACULTAD', fila.facultad);
     const cuota = fila.cuotaSocial ?? 0;
     poner('TOTAL CUOTA SOCIAL 0,5% SUELDO BASE', cuota);
-    poner('CUOTA SOCIAL AFUCHSCEN 60%', cuota * 0.6);
+    poner('CUOTA SOCIAL AFUCHSCEN 60%', fila.cuota60Forzada ?? cuota * 0.6);
     poner('CUOTA SOCIAL FENAFUCH 40%', cuota * 0.4);
     poner('FONDO  SOLIDARIO 0,8%', fila.fondoSolidario ?? 0);
     poner('COOPEUCH ACCIONES', fila.accionesCoopeuch ?? 0);
@@ -247,6 +244,57 @@ export async function crearPlanillaFicticia({
   }
   // Fila de totales sin RUT, como la que trae la planilla real al final.
   hoja.addRow(['TOTALES']);
+}
+
+export async function crearPlanillaFicticia({
+  filas = FILAS_EJEMPLO,
+  anio = 2026,
+  mes = 8,
+  nombreHoja,
+  bloquesPrestamo = BLOQUES_PRESTAMO,
+  omitirColumnas = [],
+  formatoAntiguo = false,
+  hojasPrevias = [],
+}: {
+  filas?: FilaFicticia[];
+  anio?: number;
+  mes?: number;
+  nombreHoja?: string;
+  bloquesPrestamo?: readonly string[];
+  /** Encabezados a quitar, para probar errores de formato. */
+  omitirColumnas?: readonly string[];
+  formatoAntiguo?: boolean;
+  /** Hojas de descuentos de otros meses, antes de la principal (p. ej. copias olvidadas). */
+  hojasPrevias?: readonly { mes: number; oculta?: boolean }[];
+} = {}): Promise<Buffer> {
+  const libro = new ExcelJS.Workbook();
+  // Hoja vecina: el lector debe ignorarla.
+  libro.addWorksheet('RENUNCIA').addRow(['RENUNCIAS']);
+  if (formatoAntiguo) {
+    hojaAntigua(libro);
+    return Buffer.from(await libro.xlsx.writeBuffer());
+  }
+
+  for (const previa of hojasPrevias) {
+    escribirHoja(libro, {
+      filas,
+      anio,
+      mes: previa.mes,
+      nombre: undefined,
+      bloquesPrestamo,
+      omitirColumnas,
+      oculta: previa.oculta ?? false,
+    });
+  }
+  escribirHoja(libro, {
+    filas,
+    anio,
+    mes,
+    nombre: nombreHoja,
+    bloquesPrestamo,
+    omitirColumnas,
+    oculta: false,
+  });
 
   return Buffer.from(await libro.xlsx.writeBuffer());
 }

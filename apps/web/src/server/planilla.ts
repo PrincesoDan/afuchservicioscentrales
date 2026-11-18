@@ -204,15 +204,22 @@ export async function leerPlanilla(archivo: ArrayBuffer | Buffer): Promise<Resul
     return resultado;
   }
 
-  let hoja: ExcelJS.Worksheet | undefined;
-  let encontrados: Encabezados | null = null;
-  for (const candidata of libro.worksheets) {
-    encontrados = leerEncabezados(candidata);
-    if (encontrados) {
-      hoja = candidata;
-      break;
-    }
+  const coincidencias = libro.worksheets.flatMap((candidata) => {
+    const enc = leerEncabezados(candidata);
+    return enc ? [{ hoja: candidata, encabezados: enc }] : [];
+  });
+  // Una copia oculta de otro mes no debe ganarle a la hoja vigente: reimportar
+  // reemplaza el periodo, así que tomar la equivocada pisaría datos sin aviso.
+  const visibles = coincidencias.filter((c) => c.hoja.state === 'visible');
+  const elegibles = visibles.length > 0 ? visibles : coincidencias;
+  if (elegibles.length > 1) {
+    resultado.errores.push(
+      `El archivo tiene más de una hoja de descuentos (${elegibles.map((c) => c.hoja.name).join(', ')}); deja solo la del mes que vas a subir.`,
+    );
+    return resultado;
   }
+  const hoja = elegibles[0]?.hoja;
+  const encontrados = elegibles[0]?.encabezados;
   if (!hoja || !encontrados) {
     const esAntigua = libro.worksheets.some(
       (h) => normalizarEncabezado(h.name) === HOJA_FORMATO_ANTIGUO,
@@ -326,11 +333,17 @@ export async function leerPlanilla(archivo: ArrayBuffer | Buffer): Promise<Resul
       const linea: LineaLeida = { concepto, monto: montoConcepto };
 
       if (concepto === 'CUOTA_SOCIAL') {
-        // El 60/40 trae decimales siempre: se redondea la parte de AFUCHSCEN y
-        // FENAFUCH recibe el resto, para que siempre sumen la cuota.
-        const sesenta = numero(celda(col(CUOTA_60)));
-        const afuchscen = Math.round(sesenta ?? montoConcepto * 0.6);
+        // Se calcula desde la cuota (no desde la columna 60 %, que trae decimales y
+        // podría venir vacía o corrida); FENAFUCH recibe el resto para que siempre sumen.
+        const afuchscen = Math.round(montoConcepto * 0.6);
         linea.detalle = { tipo: 'cuotaSocial', afuchscen, fenafuch: montoConcepto - afuchscen };
+        const sesenta = Math.round(numero(celda(col(CUOTA_60))) ?? 0);
+        const cuarenta = Math.round(numero(celda(col(CUOTA_40))) ?? 0);
+        if (Math.abs(sesenta + cuarenta - montoConcepto) > 1) {
+          resultado.advertencias.push(
+            `Fila ${numeroFila}: el reparto de la cuota social (60 %: ${sesenta} + 40 %: ${cuarenta}) no suma la cuota (${montoConcepto}).`,
+          );
+        }
       }
 
       if (concepto === 'GAS_ABASTIBLE') {
