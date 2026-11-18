@@ -93,24 +93,29 @@ export function rutDePrueba(indice: number): string {
 
 /** Descuentos inventados; varían por persona y por mes para que el historial se distinga. */
 function filasDe(persona: PersonaDePrueba, indice: number, mes: number): FilaFicticia[] {
-  const base = { nombre: persona.nombre, cuerpoRut: String(indice + 1).repeat(8) };
-  const facultad = 'SERVICIOS CENTRALES';
   const extra = mes === 9 ? 1000 : 0;
   return [
-    { ...base, facultad, tipoCuota: 1, montos: { 'CUOTA SOCIO': 4000 + indice * 250 } },
     {
-      ...base,
-      facultad,
-      tipoCuota: 2,
-      montos: {
-        'FONDO CONVENIO SOLIDARIO': 6500 + indice * 300,
-        GAS: 18000 + extra,
-        // Conceptos que el socio no debe ver (D12): sirven para comprobar que se ocultan.
-        'CONVENIO OPTICA GO OPTIC SPA': 15000,
-        'BONO INVIERNO DUPLICADO': 30000,
-        ...(indice % 2 === 0 ? { 'PRESTAMOS AFUCH': 20000 } : { 'FUND.LOPEZ P.': 9900 }),
-      },
-      ...(indice % 2 === 0 ? { cuotaInicial: mes === 9 ? 2 : 1, cuotaTermino: 3 } : {}),
+      nombre: persona.nombre,
+      cuerpoRut: String(indice + 1).repeat(8),
+      facultad: 'SERVICIOS CENTRALES',
+      cuotaSocial: 4000 + indice * 250,
+      fondoSolidario: 6500 + indice * 300,
+      gas: { 15: 18000 + extra },
+      valesGas: 1,
+      ...(indice % 2 === 0
+        ? {
+            prestamos: [
+              {
+                bloque: 0,
+                fecha: '2026-07-01',
+                monto: 60000,
+                cuotas: `${mes === 9 ? 2 : 1}-3`,
+                cuotaMes: 20000,
+              },
+            ],
+          }
+        : { falp: 9900 }),
     },
   ];
 }

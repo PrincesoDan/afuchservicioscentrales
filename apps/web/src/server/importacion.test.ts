@@ -31,10 +31,13 @@ describe('importarPlanilla', () => {
     const prestamo = await db().lineaDescuento.findFirstOrThrow({
       where: { socioId: socio.id, concepto: 'PRESTAMO_AFUCH' },
     });
-    expect(prestamo.detalle).toEqual([
-      { cuota: 1, total: 3 },
-      { cuota: 2, total: 3 },
-    ]);
+    expect(prestamo.detalle).toMatchObject({
+      tipo: 'prestamosAfuch',
+      prestamos: [
+        { fecha: '2026-07-12', cuota: 1, totalCuotas: 3 },
+        { fecha: '2026-06-05', cuota: 2, totalCuotas: 3 },
+      ],
+    });
   });
 
   it('reimportar el mismo periodo lo reemplaza sin duplicar', async () => {

@@ -10,46 +10,73 @@ import { leerPlanilla } from './planilla';
 
 const CLI = { tipo: 'SISTEMA', id: 'test' } as const;
 
+async function importarSocia() {
+  await importarPlanilla(
+    await leerPlanilla(
+      await crearPlanillaFicticia({
+        filas: [
+          {
+            nombre: 'PRUEBA UNO SOCIA',
+            cuerpoRut: '11111111',
+            facultad: 'FACULTAD DE ARTES',
+            cuotaSocial: 4000,
+            gas: { 15: 20000 },
+          },
+        ],
+      }),
+    ),
+    CLI,
+  );
+  const socio = await db().socio.findUniqueOrThrow({
+    where: { rutHash: hashRut(rutFicticio('11111111')) },
+  });
+  const periodo = await db().periodo.findFirstOrThrow();
+  return { socioId: socio.id, periodoId: periodo.id };
+}
+
 describe('descuentos visibles para el socio', () => {
   beforeEach(limpiarBase);
 
   it('no muestra ni suma los conceptos ocultos (D12)', async () => {
-    await importarPlanilla(
-      await leerPlanilla(
-        await crearPlanillaFicticia({
-          filas: [
-            {
-              nombre: 'PRUEBA UNO SOCIA',
-              cuerpoRut: '11111111',
-              facultad: 'FACULTAD DE ARTES',
-              tipoCuota: 1,
-              montos: {
-                'CUOTA SOCIO': 4000,
-                GAS: 20000,
-                'CONVENIO OPTICA GO OPTIC SPA': 15000,
-                'BONO INVIERNO DUPLICADO': 30000,
-              },
-            },
-          ],
-        }),
-      ),
-      CLI,
-    );
-    const socio = await db().socio.findUniqueOrThrow({
-      where: { rutHash: hashRut(rutFicticio('11111111')) },
+    const { socioId, periodoId } = await importarSocia();
+    // La planilla nueva ya no trae estos conceptos, pero los meses antiguos sí.
+    await db().lineaDescuento.createMany({
+      data: [
+        { socioId, periodoId, concepto: 'OPTICA_GO_OPTIC', monto: 15000 },
+        { socioId, periodoId, concepto: 'REINTEGRO_BONO_INVIERNO', monto: 30000 },
+      ],
     });
 
-    const [periodo] = await periodosDelSocio(socio.id);
+    const [periodo] = await periodosDelSocio(socioId);
     expect(periodo?.total).toBe(24000);
 
-    const lineas = await detallePeriodo(socio.id, periodo?.id ?? '');
+    const lineas = await detallePeriodo(socioId, periodoId);
     expect(lineas.map((l) => l.concepto)).toEqual(['CUOTA_SOCIAL', 'GAS_ABASTIBLE']);
 
     // El dato se conserva completo: solo se oculta en la vista del socio.
     expect(
       await db().lineaDescuento.count({
-        where: { socioId: socio.id, concepto: { in: [...CONCEPTOS_OCULTOS] } },
+        where: { socioId, concepto: { in: [...CONCEPTOS_OCULTOS] } },
       }),
     ).toBe(2);
+  });
+
+  it('muestra las cuotas de una línea antigua', async () => {
+    const { socioId, periodoId } = await importarSocia();
+    await db().lineaDescuento.create({
+      data: {
+        socioId,
+        periodoId,
+        concepto: 'PRESTAMO_AFUCH',
+        monto: 20000,
+        detalle: [{ cuota: 1, total: 3 }],
+      },
+    });
+
+    const lineas = await detallePeriodo(socioId, periodoId);
+    expect(lineas.find((l) => l.concepto === 'PRESTAMO_AFUCH')?.detalle).toEqual({
+      tipo: 'cuotasAntiguas',
+      cuotas: [{ cuota: 1, total: 3 }],
+    });
   });
 });

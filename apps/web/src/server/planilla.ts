@@ -1,28 +1,37 @@
 import { esRutValido } from '@afuch/contracts';
 import type { ConceptoDescuento } from '@afuch/db';
 import ExcelJS from 'exceljs';
+import type { DetalleDescuento, PrestamoDetalle } from '@/lib/detalle-descuento';
 
 /**
- * Lee la hoja `ASOCIACI` de la planilla mensual de AFUCH. No escribe nada: el
- * resultado se muestra como vista previa y solo se importa si no hay errores.
- * Formato y decisiones: docs/superpowers/plans/2026-09-23-plan-cierre-propuesta.md §3.2 y §5.
+ * Lee la «PLANILLA DESCUENTOS PAGINA WEB» que AFUCH entrega desde octubre de 2026.
+ * No escribe nada: el resultado se muestra como vista previa y solo se importa si
+ * no hay errores. Formato y decisiones:
+ * docs/superpowers/specs/2026-11-18-planilla-nuevo-formato-design.md.
  */
 
-export const HOJA_SOCIOS = 'ASOCIACI';
-
-/** Encabezado de la planilla → concepto. El orden es el de las columnas Q..Z. */
-export const COLUMNAS_CONCEPTO: ReadonlyArray<readonly [string, ConceptoDescuento]> = [
-  ['CUOTA SOCIO', 'CUOTA_SOCIAL'],
-  ['FONDO CONVENIO SOLIDARIO', 'FONDO_SOLIDARIO'],
-  ['ACCIONES1', 'ACCIONES_COOPEUCH'],
+/** Encabezado → concepto, en el orden en que se muestran al socio. */
+const CONCEPTOS_FIJOS: ReadonlyArray<readonly [string, ConceptoDescuento]> = [
+  ['TOTAL CUOTA SOCIAL 0,5% SUELDO BASE', 'CUOTA_SOCIAL'],
+  ['FONDO SOLIDARIO 0,8%', 'FONDO_SOLIDARIO'],
+  ['COOPEUCH ACCIONES', 'ACCIONES_COOPEUCH'],
   ['COOPEUCH PRESTAMOS', 'PRESTAMO_COOPEUCH'],
-  ['LIBAHORR1', 'LIBRETA_AHORRO'],
-  ['FUND.LOPEZ P.', 'SEGURO_ONCOLOGICO_FALP'],
-  ['CONVENIO OPTICA GO OPTIC SPA', 'OPTICA_GO_OPTIC'],
-  ['BONO INVIERNO DUPLICADO', 'REINTEGRO_BONO_INVIERNO'],
-  ['GAS', 'GAS_ABASTIBLE'],
-  ['PRESTAMOS AFUCH', 'PRESTAMO_AFUCH'],
+  ['COOPEUCH LIB. AHORRO', 'LIBRETA_AHORRO'],
+  ['FUND.LOPEZ PEREZ.', 'SEGURO_ONCOLOGICO_FALP'],
+  ['TOTAL COSTO VALES DE GAS', 'GAS_ABASTIBLE'],
 ];
+
+const GAS_POR_TIPO = [
+  ['GAS05N', 5],
+  ['GAS11N', 11],
+  ['GAS15N', 15],
+  ['GAS45N', 45],
+] as const;
+
+const CUOTA_60 = 'CUOTA SOCIAL AFUCHSCEN 60%';
+const CUOTA_40 = 'CUOTA SOCIAL FENAFUCH 40%';
+const TOTAL_FILA = 'TOTAL DESCUENTO AFUCHSCEN';
+const VALES_GAS = 'TOTAL VALES DE GAS';
 
 const COLUMNAS_OBLIGATORIAS = [
   'NOMBRE',
@@ -31,18 +40,23 @@ const COLUMNAS_OBLIGATORIAS = [
   'RUT',
   'DV',
   'FACULTAD',
-  'MONTO',
-  'C/INICIAL1',
-  'C/TERM1',
-  ...COLUMNAS_CONCEPTO.map(([encabezado]) => encabezado),
-] as const;
+  TOTAL_FILA,
+  CUOTA_60,
+  CUOTA_40,
+  VALES_GAS,
+  ...CONCEPTOS_FIJOS.map(([encabezado]) => encabezado),
+  ...GAS_POR_TIPO.map(([encabezado]) => encabezado),
+];
 
-export type CuotaPrestamo = { cuota: number; total: number };
+/** Columnas que identifican la hoja de descuentos entre las demás del libro. */
+const COLUMNAS_IDENTIFICADORAS = ['NOMBRE', 'RUT', TOTAL_FILA];
+const FILAS_CON_ENCABEZADOS = 5;
+const HOJA_FORMATO_ANTIGUO = 'ASOCIACI';
 
 export type LineaLeida = {
   concepto: ConceptoDescuento;
   monto: number;
-  detalle?: CuotaPrestamo[];
+  detalle?: DetalleDescuento;
 };
 
 export type SocioLeido = {
@@ -97,25 +111,80 @@ function numero(v: Primitivo): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-/**
- * `C/INICIAL1` = cuota del mes, `C/TERM1` = total de cuotas. Con varios
- * préstamos vienen separados por guion en el mismo orden: "1-2" y "3-3".
- * Devuelve `null` si no se puede interpretar.
- */
-export function interpretarCuotas(inicial: string, termino: string): CuotaPrestamo[] | null {
-  const partesInicial = inicial.split('-').map((p) => p.trim());
-  const partesTermino = termino.split('-').map((p) => p.trim());
-  if (partesInicial.length !== partesTermino.length) return null;
+/** «2-3» = cuota 2 de 3. Devuelve `null` si no se puede interpretar. */
+export function interpretarCuotaPrestamo(
+  textoCuotas: string,
+): { cuota: number; total: number } | null {
+  const partes = textoCuotas.split('-').map((p) => p.trim());
+  if (partes.length !== 2 || partes.some((p) => !/^\d+$/.test(p))) return null;
+  const [cuota, total] = partes.map(Number) as [number, number];
+  if (cuota < 1 || total < 1 || cuota > total) return null;
+  return { cuota, total };
+}
 
-  const cuotas: CuotaPrestamo[] = [];
-  for (let i = 0; i < partesInicial.length; i += 1) {
-    const cuota = Number(partesInicial[i]);
-    const total = Number(partesTermino[i]);
-    if (!Number.isInteger(cuota) || !Number.isInteger(total)) return null;
-    if (cuota < 1 || total < 1 || cuota > total) return null;
-    cuotas.push({ cuota, total });
+type Encabezados = {
+  fila: number;
+  /** Columna → encabezado normalizado, en orden de columna. */
+  porColumna: Map<number, string>;
+  /** Encabezado → primera columna donde aparece (los hay repetidos). */
+  columna: Map<string, number>;
+};
+
+function leerEncabezados(hoja: ExcelJS.Worksheet): Encabezados | null {
+  for (let fila = 1; fila <= FILAS_CON_ENCABEZADOS; fila += 1) {
+    const porColumna = new Map<number, string>();
+    const columna = new Map<string, number>();
+    hoja.getRow(fila).eachCell((celda, numeroColumna) => {
+      const encabezado = normalizarEncabezado(texto(valor(celda.value)));
+      if (!encabezado) return;
+      porColumna.set(numeroColumna, encabezado);
+      if (!columna.has(encabezado)) columna.set(encabezado, numeroColumna);
+    });
+    if (COLUMNAS_IDENTIFICADORAS.every((c) => columna.has(c))) return { fila, porColumna, columna };
   }
-  return cuotas;
+  return null;
+}
+
+type BloquePrestamo = { fecha: number; monto: number; cuotas: number; cuotaMes: number };
+
+/**
+ * Los préstamos vienen en bloques de 4 columnas, uno por mes de otorgamiento, y
+ * sus nombres cambian cada mes («CUOTA DE <MES>» se repite en todos). Por eso se
+ * detectan por posición a partir de cada «FECHA PRESTAMO…».
+ */
+function bloquesPrestamo(
+  hoja: ExcelJS.Worksheet,
+  { porColumna }: Encabezados,
+  errores: string[],
+): BloquePrestamo[] {
+  const bloques: BloquePrestamo[] = [];
+  const esperados = ['MONTO PRESTAMO', 'CUOTAS PRESTAMO', 'CUOTA DE'];
+  for (const [columna, encabezado] of porColumna) {
+    if (!encabezado.startsWith('FECHA PRESTAMO')) continue;
+    const enOrden = esperados.every((prefijo, i) =>
+      (porColumna.get(columna + i + 1) ?? '').startsWith(prefijo),
+    );
+    if (!enOrden) {
+      errores.push(
+        `Las columnas del préstamo que empieza en la columna ${hoja.getColumn(columna).letter} no siguen el orden FECHA, MONTO, CUOTAS, CUOTA DEL MES.`,
+      );
+      continue;
+    }
+    bloques.push({
+      fecha: columna,
+      monto: columna + 1,
+      cuotas: columna + 2,
+      cuotaMes: columna + 3,
+    });
+  }
+  if (bloques.length === 0 && errores.length === 0) {
+    errores.push('No se encontraron las columnas de préstamos AFUCH (FECHA PRESTAMO…).');
+  }
+  return bloques;
+}
+
+function fechaIso(v: Primitivo): string | null {
+  return v instanceof Date && !Number.isNaN(v.getTime()) ? v.toISOString().slice(0, 10) : null;
 }
 
 export async function leerPlanilla(archivo: ArrayBuffer | Buffer): Promise<ResultadoPlanilla> {
@@ -135,41 +204,55 @@ export async function leerPlanilla(archivo: ArrayBuffer | Buffer): Promise<Resul
     return resultado;
   }
 
-  const hoja = libro.worksheets.find((h) => normalizarEncabezado(h.name) === HOJA_SOCIOS);
-  if (!hoja) {
-    resultado.errores.push(`No se encontró la hoja "${HOJA_SOCIOS}".`);
-    return resultado;
+  let hoja: ExcelJS.Worksheet | undefined;
+  let encontrados: Encabezados | null = null;
+  for (const candidata of libro.worksheets) {
+    encontrados = leerEncabezados(candidata);
+    if (encontrados) {
+      hoja = candidata;
+      break;
+    }
   }
-
-  const columnas = new Map<string, number>();
-  hoja.getRow(1).eachCell((celda, numeroColumna) => {
-    const encabezado = normalizarEncabezado(texto(valor(celda.value)));
-    if (encabezado && !columnas.has(encabezado)) columnas.set(encabezado, numeroColumna);
-  });
-
-  const faltantes = COLUMNAS_OBLIGATORIAS.filter((c) => !columnas.has(c));
-  if (faltantes.length > 0) {
+  if (!hoja || !encontrados) {
+    const esAntigua = libro.worksheets.some(
+      (h) => normalizarEncabezado(h.name) === HOJA_FORMATO_ANTIGUO,
+    );
     resultado.errores.push(
-      `Faltan columnas en la fila 1 de "${HOJA_SOCIOS}": ${faltantes.join(', ')}.`,
+      esAntigua
+        ? 'Es el formato antiguo de la planilla. AFUCH ahora entrega la «PLANILLA DESCUENTOS PAGINA WEB»; sube esa.'
+        : `No se encontró la hoja de descuentos (una fila con las columnas ${COLUMNAS_IDENTIFICADORAS.join(', ')}).`,
     );
     return resultado;
   }
+  const encabezados = encontrados;
 
-  const col = (nombre: (typeof COLUMNAS_OBLIGATORIAS)[number]) => columnas.get(nombre)!;
+  const faltantes = COLUMNAS_OBLIGATORIAS.filter((c) => !encabezados.columna.has(c));
+  if (faltantes.length > 0) {
+    resultado.errores.push(
+      `Faltan columnas en la fila ${encabezados.fila} de "${hoja.name}": ${faltantes.join(', ')}.`,
+    );
+    return resultado;
+  }
+  const bloques = bloquesPrestamo(hoja, encabezados, resultado.errores);
+  if (resultado.errores.length > 0) return resultado;
+
+  const col = (encabezado: string) => encabezados.columna.get(encabezado)!;
+  const columnaTotalPrestamos = [...encabezados.porColumna].find(([, e]) =>
+    e.startsWith('TOTAL DESC PRESTAMOS'),
+  )?.[0];
   const periodos = new Set<string>();
-  const porRut = new Map<string, SocioLeido>();
+  const porRut = new Map<string, { fila: number; socio: SocioLeido }>();
 
   hoja.eachRow((fila, numeroFila) => {
-    if (numeroFila === 1) return;
-    const celda = (nombre: (typeof COLUMNAS_OBLIGATORIAS)[number]) =>
-      valor(fila.getCell(col(nombre)).value);
+    if (numeroFila <= encabezados.fila) return;
+    const celda = (columna: number) => valor(fila.getCell(columna).value);
 
-    const cuerpoRut = texto(celda('RUT')).replace(/\./g, '');
+    const cuerpoRut = texto(celda(col('RUT'))).replace(/\./g, '');
     // Filas sin RUT: títulos, totales o separadores. No son socios.
     if (!cuerpoRut) return;
 
     resultado.resumen.filasLeidas += 1;
-    const rut = `${cuerpoRut}${texto(celda('DV')).toUpperCase()}`;
+    const rut = `${cuerpoRut}${texto(celda(col('DV'))).toUpperCase()}`;
     if (!esRutValido(rut)) {
       // No bloquea: la planilla real trae algunos DV mal digitados y detener todo
       // el mes por ellos dejaría sin datos al resto. La fila se excluye y se
@@ -179,9 +262,15 @@ export async function leerPlanilla(archivo: ArrayBuffer | Buffer): Promise<Resul
       );
       return;
     }
+    const repetido = porRut.get(rut);
+    if (repetido) {
+      // En este formato cada socio viene en una sola fila: sumar dos sería adivinar.
+      resultado.errores.push(`RUT repetido en las filas ${repetido.fila} y ${numeroFila}.`);
+      return;
+    }
 
-    const anio = numero(celda('FECHA'));
-    const mes = numero(celda('MES'));
+    const anio = numero(celda(col('FECHA')));
+    const mes = numero(celda(col('MES')));
     if (!anio || !mes || !Number.isInteger(anio) || !Number.isInteger(mes) || mes < 1 || mes > 12) {
       resultado.errores.push(`Fila ${numeroFila}: FECHA/MES no es un periodo válido.`);
       return;
@@ -189,67 +278,113 @@ export async function leerPlanilla(archivo: ArrayBuffer | Buffer): Promise<Resul
     periodos.add(`${anio}-${mes}`);
     resultado.periodo ??= { anio, mes };
 
-    let socio = porRut.get(rut);
-    if (!socio) {
-      socio = {
-        rut,
-        nombre: texto(celda('NOMBRE')),
-        facultad: texto(celda('FACULTAD')) || null,
-        lineas: [],
-      };
-      porRut.set(rut, socio);
-    }
-
-    let sumaFila = 0;
-    for (const [encabezado, concepto] of COLUMNAS_CONCEPTO) {
-      const monto = numero(
-        valor(fila.getCell(col(encabezado as (typeof COLUMNAS_OBLIGATORIAS)[number])).value),
-      );
-      if (monto === null) {
+    /** Monto entero de una columna; `null` si no es número (el error ya quedó anotado). */
+    const monto = (columna: number): number | null => {
+      const n = numero(celda(columna));
+      const encabezado = encabezados.porColumna.get(columna) ?? '';
+      if (n === null) {
         resultado.errores.push(`Fila ${numeroFila}: "${encabezado}" no es un número.`);
-        continue;
+        return null;
       }
-      if (monto === 0) continue;
-      const montoEntero = Math.round(monto);
-      if (montoEntero !== monto) {
+      const entero = Math.round(n);
+      if (entero !== n) {
         resultado.advertencias.push(
-          `Fila ${numeroFila}: "${encabezado}" tenía decimales; se redondeó a ${montoEntero}.`,
+          `Fila ${numeroFila}: "${encabezado}" tenía decimales; se redondeó a ${entero}.`,
         );
       }
-      sumaFila += montoEntero;
+      return entero;
+    };
 
-      const linea: LineaLeida = { concepto, monto: montoEntero };
-      if (concepto === 'PRESTAMO_AFUCH') {
-        const inicial = texto(celda('C/INICIAL1'));
-        const termino = texto(celda('C/TERM1'));
-        if (inicial || termino) {
-          const cuotas = interpretarCuotas(inicial, termino);
-          if (cuotas) linea.detalle = cuotas;
-          else
-            resultado.advertencias.push(
-              `Fila ${numeroFila}: cuotas del préstamo AFUCH ("${inicial}" / "${termino}") no se pudieron interpretar; se muestra solo el monto.`,
-            );
+    const socio: SocioLeido = {
+      rut,
+      nombre: texto(celda(col('NOMBRE'))),
+      facultad: texto(celda(col('FACULTAD'))) || null,
+      lineas: [],
+    };
+    porRut.set(rut, { fila: numeroFila, socio });
+
+    for (const [encabezado, concepto] of CONCEPTOS_FIJOS) {
+      const montoConcepto = monto(col(encabezado));
+      if (!montoConcepto) continue;
+      const linea: LineaLeida = { concepto, monto: montoConcepto };
+
+      if (concepto === 'CUOTA_SOCIAL') {
+        // El 60/40 trae decimales siempre: se redondea la parte de AFUCHSCEN y
+        // FENAFUCH recibe el resto, para que siempre sumen la cuota.
+        const sesenta = numero(celda(col(CUOTA_60)));
+        const afuchscen = Math.round(sesenta ?? montoConcepto * 0.6);
+        linea.detalle = { tipo: 'cuotaSocial', afuchscen, fenafuch: montoConcepto - afuchscen };
+      }
+
+      if (concepto === 'GAS_ABASTIBLE') {
+        const porTipo: { kilos: 5 | 11 | 15 | 45; monto: number }[] = [];
+        for (const [encabezadoGas, kilos] of GAS_POR_TIPO) {
+          const montoTipo = monto(col(encabezadoGas));
+          if (montoTipo) porTipo.push({ kilos, monto: montoTipo });
         }
+        const sumaTipos = porTipo.reduce((a, t) => a + t.monto, 0);
+        if (sumaTipos !== montoConcepto) {
+          resultado.advertencias.push(
+            `Fila ${numeroFila}: los vales de gas por tipo (${sumaTipos}) no suman el total de gas (${montoConcepto}).`,
+          );
+        }
+        const vales = numero(celda(col(VALES_GAS)));
+        linea.detalle = {
+          tipo: 'gas',
+          porTipo,
+          vales: vales && vales > 0 ? Math.round(vales) : null,
+        };
       }
 
-      const existente = socio.lineas.find((l) => l.concepto === concepto);
-      if (existente) {
-        existente.monto += linea.monto;
-        if (linea.detalle)
-          existente.detalle = [...(existente.detalle ?? []), ...linea.detalle];
-      } else {
-        socio.lineas.push(linea);
-      }
-      resultado.resumen.totalPorConcepto[concepto] =
-        (resultado.resumen.totalPorConcepto[concepto] ?? 0) + montoEntero;
-      resultado.resumen.total += montoEntero;
+      socio.lineas.push(linea);
     }
 
-    const montoPlanilla = numero(celda('MONTO'));
-    if (montoPlanilla !== null && Math.round(montoPlanilla) !== sumaFila) {
+    const prestamos: PrestamoDetalle[] = [];
+    for (const bloque of bloques) {
+      const montoCuota = monto(bloque.cuotaMes);
+      if (!montoCuota) continue;
+      const textoCuotas = texto(celda(bloque.cuotas));
+      const cuotas = interpretarCuotaPrestamo(textoCuotas);
+      if (!cuotas) {
+        resultado.advertencias.push(
+          `Fila ${numeroFila}: las cuotas del préstamo «${textoCuotas}» no se pudieron interpretar; se muestra sin cuota n de m.`,
+        );
+      }
+      prestamos.push({
+        fecha: fechaIso(celda(bloque.fecha)),
+        montoPrestado: monto(bloque.monto) ?? 0,
+        cuota: cuotas?.cuota ?? null,
+        totalCuotas: cuotas?.total ?? null,
+        montoCuota,
+      });
+    }
+    if (prestamos.length > 0) {
+      const montoPrestamos = prestamos.reduce((a, p) => a + p.montoCuota, 0);
+      socio.lineas.push({
+        concepto: 'PRESTAMO_AFUCH',
+        monto: montoPrestamos,
+        detalle: { tipo: 'prestamosAfuch', prestamos },
+      });
+      const totalPlanilla =
+        columnaTotalPrestamos === undefined ? null : numero(celda(columnaTotalPrestamos));
+      if (totalPlanilla !== null && Math.round(totalPlanilla) !== montoPrestamos) {
+        resultado.advertencias.push(
+          `Fila ${numeroFila}: el total de préstamos AFUCH (${Math.round(totalPlanilla)}) no coincide con la suma de sus cuotas (${montoPrestamos}).`,
+        );
+      }
+    }
+
+    const sumaFila = socio.lineas.reduce((a, l) => a + l.monto, 0);
+    const totalFila = numero(celda(col(TOTAL_FILA)));
+    if (totalFila !== null && Math.round(totalFila) !== sumaFila) {
       resultado.advertencias.push(
-        `Fila ${numeroFila}: MONTO (${Math.round(montoPlanilla)}) no coincide con la suma de conceptos (${sumaFila}).`,
+        `Fila ${numeroFila}: TOTAL DESCUENTO AFUCHSCEN (${Math.round(totalFila)}) no coincide con la suma de conceptos (${sumaFila}).`,
       );
+    }
+    for (const linea of socio.lineas) {
+      resultado.resumen.totalPorConcepto[linea.concepto] =
+        (resultado.resumen.totalPorConcepto[linea.concepto] ?? 0) + linea.monto;
+      resultado.resumen.total += linea.monto;
     }
   });
 
@@ -259,9 +394,9 @@ export async function leerPlanilla(archivo: ArrayBuffer | Buffer): Promise<Resul
     );
   }
   if (porRut.size === 0 && resultado.errores.length === 0) {
-    resultado.errores.push(`La hoja "${HOJA_SOCIOS}" no tiene filas con RUT.`);
+    resultado.errores.push(`La hoja "${hoja.name}" no tiene filas con RUT.`);
   }
 
-  resultado.socios = [...porRut.values()];
+  resultado.socios = [...porRut.values()].map(({ socio }) => socio);
   return resultado;
 }
