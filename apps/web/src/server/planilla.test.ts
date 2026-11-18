@@ -49,7 +49,7 @@ describe('leerPlanilla', () => {
       {
         concepto: 'PRESTAMO_AFUCH',
         monto: 40000,
-        detalleCuotas: [
+        detalle: [
           { cuota: 1, total: 3 },
           { cuota: 2, total: 3 },
         ],

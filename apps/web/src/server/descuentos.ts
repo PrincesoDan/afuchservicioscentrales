@@ -1,6 +1,6 @@
 import 'server-only';
 import { db, type ConceptoDescuento } from '@afuch/db';
-import type { CuotaPrestamo } from './planilla';
+import { interpretarDetalle, type DetalleInterpretado } from '@/lib/detalle-descuento';
 
 /** Nombre visible de cada concepto. Decisiones en el plan §3.2 (P5). */
 export const NOMBRE_CONCEPTO: Record<ConceptoDescuento, string> = {
@@ -34,7 +34,7 @@ export type LineaVisible = {
   concepto: ConceptoDescuento;
   nombre: string;
   monto: number;
-  cuotas: CuotaPrestamo[];
+  detalle: DetalleInterpretado | null;
 };
 
 /** Periodos con descuentos del socio, del más reciente al más antiguo. */
@@ -67,7 +67,7 @@ export async function detallePeriodo(socioId: string, periodoId: string): Promis
       concepto: l.concepto,
       nombre: NOMBRE_CONCEPTO[l.concepto],
       monto: l.monto,
-      cuotas: Array.isArray(l.detalleCuotas) ? (l.detalleCuotas as CuotaPrestamo[]) : [],
+      detalle: interpretarDetalle(l.detalle),
     }))
     .sort((a, b) => ORDEN.indexOf(a.concepto) - ORDEN.indexOf(b.concepto));
 }

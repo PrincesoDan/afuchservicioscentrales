@@ -42,7 +42,7 @@ export type CuotaPrestamo = { cuota: number; total: number };
 export type LineaLeida = {
   concepto: ConceptoDescuento;
   monto: number;
-  detalleCuotas?: CuotaPrestamo[];
+  detalle?: CuotaPrestamo[];
 };
 
 export type SocioLeido = {
@@ -224,7 +224,7 @@ export async function leerPlanilla(archivo: ArrayBuffer | Buffer): Promise<Resul
         const termino = texto(celda('C/TERM1'));
         if (inicial || termino) {
           const cuotas = interpretarCuotas(inicial, termino);
-          if (cuotas) linea.detalleCuotas = cuotas;
+          if (cuotas) linea.detalle = cuotas;
           else
             resultado.advertencias.push(
               `Fila ${numeroFila}: cuotas del préstamo AFUCH ("${inicial}" / "${termino}") no se pudieron interpretar; se muestra solo el monto.`,
@@ -235,8 +235,8 @@ export async function leerPlanilla(archivo: ArrayBuffer | Buffer): Promise<Resul
       const existente = socio.lineas.find((l) => l.concepto === concepto);
       if (existente) {
         existente.monto += linea.monto;
-        if (linea.detalleCuotas)
-          existente.detalleCuotas = [...(existente.detalleCuotas ?? []), ...linea.detalleCuotas];
+        if (linea.detalle)
+          existente.detalle = [...(existente.detalle ?? []), ...linea.detalle];
       } else {
         socio.lineas.push(linea);
       }

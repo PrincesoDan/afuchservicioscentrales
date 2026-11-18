@@ -76,7 +76,7 @@ export async function importarPlanilla(
           socioId: idPorHash.get(s.rutHash)!,
           concepto: l.concepto,
           monto: l.monto,
-          detalleCuotas: l.detalleCuotas ?? undefined,
+          detalle: l.detalle ?? undefined,
         })),
       );
       await tx.lineaDescuento.createMany({ data: lineas });

@@ -101,8 +101,9 @@ model LineaDescuento {
   socioId       String
   concepto      ConceptoDescuento
   monto         Int
-  /// Solo PRESTAMO_AFUCH: [{ cuota, total }] por préstamo, en el orden de la planilla.
-  detalleCuotas Json?
+  /// Desglose de la línea (ver apps/web/src/lib/detalle-descuento.ts). La columna conserva el
+  /// nombre antiguo para no migrar; agosto y septiembre de 2026 guardan ahí [{ cuota, total }].
+  detalle       Json?             @map("detalleCuotas")
 
   periodo Periodo @relation(fields: [periodoId], references: [id], onDelete: Cascade)
   socio   Socio   @relation(fields: [socioId], references: [id], onDelete: Cascade)

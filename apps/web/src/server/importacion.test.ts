@@ -31,7 +31,7 @@ describe('importarPlanilla', () => {
     const prestamo = await db().lineaDescuento.findFirstOrThrow({
       where: { socioId: socio.id, concepto: 'PRESTAMO_AFUCH' },
     });
-    expect(prestamo.detalleCuotas).toEqual([
+    expect(prestamo.detalle).toEqual([
       { cuota: 1, total: 3 },
       { cuota: 2, total: 3 },
     ]);

@@ -198,7 +198,7 @@ export async function exportarSocio(socioId: string, actor: Actor) {
       periodo: `${l.periodo.anio}-${String(l.periodo.mes).padStart(2, '0')}`,
       concepto: l.concepto,
       monto: l.monto,
-      cuotas: l.detalleCuotas,
+      detalle: l.detalle,
     })),
     accesos: auditoria.map((r) => ({ fecha: r.fecha, accion: r.accion, ip: r.ip })),
   };
