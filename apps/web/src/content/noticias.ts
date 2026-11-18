@@ -3,6 +3,46 @@ import { z } from 'zod';
 
 const noticias: Noticia[] = [
   {
+    slug: 'trabajadores-ballet-nacional-chileno-logran-acuerdos-autoridades-uchile',
+    titulo:
+      'Trabajadores del Ballet Nacional Chileno logran importantes acuerdos con autoridades de la Universidad de Chile',
+    bajada:
+      'Tras un proceso de movilización y diálogo, representantes de las y los trabajadores del Ballet Nacional Chileno (BANCH), junto a sus organizaciones sindicales, alcanzaron un acuerdo con las autoridades universitarias que establece compromisos para avanzar en la estabilidad laboral, la participación del elenco y el funcionamiento de la institución.',
+    fecha: '2026-11-18',
+    categoria: 'comunicado',
+    portada: {
+      src: '/noticias/banch-firma-acuerdo.webp',
+      alt: 'Representantes de las y los trabajadores y de las organizaciones sindicales posan junto al acta de acuerdos firmada.',
+    },
+    cuerpo: [
+      'El martes 17 de noviembre se firmó un acta de acuerdos entre la Dirección del Centro de Extensión Artística y Cultural (CEAC), la Vicerrectoría de Asuntos Económicos y Gestión Institucional (VAEGI), representantes de las y los bailarines, FENAFUCH, AFUCH y su filial CEAC.',
+      'Este importante avance se produce en el contexto de las movilizaciones del elenco y las conversaciones sostenidas con las autoridades tras el término de la vinculación laboral de la directora artística del Ballet.',
+      '**Entre los principales acuerdos alcanzados destacan:**',
+      {
+        lista: [
+          'Establecer un cronograma de trabajo para noviembre y diciembre de 2026, que comenzará a abordarse en reuniones desde el 25 de noviembre.',
+          'Diseñar una metodología participativa que incorpore al elenco en el proceso de elección de la dirección artística.',
+          'Promover mecanismos de participación de las y los bailarines en el funcionamiento del BANCH.',
+          'Revisar el instructivo de trabajo del Ballet.',
+          'Deponer el paro en el marco de los compromisos establecidos.',
+        ],
+      },
+      'El acta también reafirma el compromiso de las partes con la continuidad de las actividades y la estabilidad laboral del elenco, así como con el derecho de sus integrantes a ser evaluados con imparcialidad, conforme a la normativa vigente y sin considerar factores ajenos a sus funciones.',
+      '**Desde las organizaciones sindicales valoramos este acuerdo como un avance fruto de la organización, la movilización y la participación activa de las y los trabajadores.**',
+      'Este paso abre una nueva etapa de trabajo, en la que será fundamental dar seguimiento al cumplimiento de los compromisos asumidos y continuar fortaleciendo la participación de las y los trabajadores en las decisiones que afectan su futuro laboral y el desarrollo del Ballet Nacional Chileno.',
+    ],
+    galeria: [
+      {
+        src: '/noticias/banch-elenco-lienzo.webp',
+        alt: 'Integrantes del elenco del BANCH frente al CEAC con un lienzo de AFUCH, FENAFUCH y AFUCH CEAC: «CEAC en paro. ¡Basta de negligencia y abuso en el CEAC UChile! Solidaridad con los bailarines del Ballet Nacional Chileno».',
+      },
+      {
+        src: '/noticias/banch-protesta-cartel.webp',
+        alt: 'Una bailarina y un bailarín del BANCH sostienen un cartel de protesta durante la movilización.',
+      },
+    ],
+  },
+  {
     slug: 'rectora-mizala-primera-reunion-directiva-fenafuch',
     titulo: 'Rectora Mizala sostuvo su primera reunión con la directiva de Fenafuch',
     bajada:

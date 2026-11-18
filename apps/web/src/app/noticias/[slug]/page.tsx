@@ -82,12 +82,44 @@ export default async function PaginaNoticia({ params }: Props) {
 
         <div className="mx-auto mt-12 max-w-3xl">
           <div className="space-y-6">
-            {noticia.cuerpo.map((parrafo, indice) => (
-              <p key={indice} className="text-lg/8 text-slate-700">
-                <TextoEnriquecido texto={parrafo} />
-              </p>
-            ))}
+            {noticia.cuerpo.map((bloque, indice) =>
+              typeof bloque === 'string' ? (
+                <p key={indice} className="text-lg/8 text-slate-700">
+                  <TextoEnriquecido texto={bloque} />
+                </p>
+              ) : (
+                <ul
+                  key={indice}
+                  className="list-disc space-y-2 pl-6 text-lg/8 text-slate-700 marker:text-navy-400"
+                >
+                  {bloque.lista.map((item, indiceItem) => (
+                    <li key={indiceItem}>
+                      <TextoEnriquecido texto={item} />
+                    </li>
+                  ))}
+                </ul>
+              ),
+            )}
           </div>
+
+          {noticia.galeria?.length ? (
+            <div className="mt-12 grid items-start gap-6 sm:grid-cols-2">
+              {noticia.galeria.map((imagen) => (
+                <figure key={imagen.src}>
+                  {/* Sin recorte: las fotos de una nota suelen mezclar orientaciones. */}
+                  <Image
+                    src={imagen.src}
+                    alt={imagen.alt}
+                    width={0}
+                    height={0}
+                    sizes="(max-width: 640px) 100vw, 380px"
+                    className="h-auto w-full rounded-xl bg-navy-50"
+                  />
+                  <figcaption className="mt-3 text-sm text-slate-500">{imagen.alt}</figcaption>
+                </figure>
+              ))}
+            </div>
+          ) : null}
 
           <footer className="mt-12 border-t border-slate-200 pt-8 text-sm/6 text-slate-500">
             {noticia.autor ? <p>Texto: {noticia.autor}</p> : null}
