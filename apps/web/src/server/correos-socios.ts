@@ -15,7 +15,11 @@ import { normalizarEncabezado, texto, valor } from './planilla';
  * se registra e ingresa. El socio debe existir antes (viene de la planilla).
  */
 
-const ENCABEZADOS_CORREO = ['MAIL', 'E-MAIL', 'EMAIL', 'CORREO', 'CORREO ELECTRONICO'];
+/**
+ * «CORREOS» viene en la lista «SOCIOS 2026» (2026-11-18). Ese libro también trae
+ * la hoja RENUNCIA con la misma columna: se usa la primera hoja que calce, que es SOCIOS.
+ */
+const ENCABEZADOS_CORREO = ['MAIL', 'E-MAIL', 'EMAIL', 'CORREO', 'CORREOS', 'CORREO ELECTRONICO'];
 /** El encabezado puede venir bajo un título: se busca en las primeras filas. */
 const FILAS_DE_ENCABEZADO = 5;
 

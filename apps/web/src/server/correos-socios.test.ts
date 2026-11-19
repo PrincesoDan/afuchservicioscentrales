@@ -82,6 +82,37 @@ describe('leerListaCorreos', () => {
     expect(lectura.filas.map((f) => f.rut)).toEqual([UNO, DOS]);
   });
 
+  it('lee la columna «CORREOS» de la hoja SOCIOS y no la de RENUNCIA (lista de nov. 2026)', async () => {
+    const libro = new ExcelJS.Workbook();
+    const encabezados = ['RUTDV', 'RUT', 'DV', 'COPIA NOMBRES', 'FSOLID', 'INGRESO', 'SEXO'];
+    const socios = libro.addWorksheet('SOCIOS');
+    socios.addRow([...encabezados, 'CORREOS', 'FACULTAD']);
+    socios.addRow([
+      Number(UNO),
+      Number(UNO.slice(0, -1)),
+      UNO.slice(-1),
+      'PRUEBA',
+      4263,
+      null,
+      'F',
+      'uno@uchile.cl',
+    ]);
+    libro.addWorksheet('SIN FONDO').addRow(encabezados);
+    const renuncia = libro.addWorksheet('RENUNCIA');
+    renuncia.addRow(['RUTDV', 'RUT', 'DV', 'COPIA NOMBRES', 'CORREOS', 'F RENUNCIA', 'MOTIVO']);
+    renuncia.addRow([
+      Number(DOS),
+      Number(DOS.slice(0, -1)),
+      DOS.slice(-1),
+      'PRUEBA',
+      'dos@uchile.cl',
+    ]);
+
+    const lectura = await leerListaCorreos(Buffer.from(await libro.xlsx.writeBuffer()));
+    expect(lectura.errores).toEqual([]);
+    expect(lectura.filas).toEqual([{ fila: 2, rut: UNO, correo: 'uno@uchile.cl' }]);
+  });
+
   it('informa los errores por número de fila, sin datos personales', async () => {
     const lectura = await leerListaCorreos(
       await crearListaCorreosFicticia([
